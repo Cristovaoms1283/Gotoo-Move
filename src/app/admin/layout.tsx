@@ -23,6 +23,9 @@ export default async function AdminLayout({
           <Link href="/admin/users" className="block p-2 hover:bg-zinc-900 rounded transition">
             Gerenciar Alunos
           </Link>
+          <Link href="/admin/guests" className="block p-2 hover:bg-zinc-900 rounded transition text-blue-400 font-bold">
+            Gestão de Convidados
+          </Link>
           <Link href="/admin/workouts" className="block p-2 hover:bg-zinc-900 rounded transition">
             Fichas de Treino
           </Link>

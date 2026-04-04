@@ -13,6 +13,8 @@ model User {
   clerkId          String         @unique
   name             String
   email            String         @unique
+  whatsapp         String?
+  isGuest          Boolean        @default(false)
   stripeCustomerId String?        @unique
   subscriptionId   String?
   status           String         @default("inactive")
@@ -33,6 +35,19 @@ model User {
   workoutLogs      WorkoutLog[]
   rewards          UserReward[]
   exerciseLoads    ExerciseLoad[]
+
+  @@schema("fitconnect")
+}
+
+model Lead {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  whatsapp         String
+  token            String   @unique
+  isConfirmed      Boolean  @default(false)
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
 
   @@schema("fitconnect")
 }

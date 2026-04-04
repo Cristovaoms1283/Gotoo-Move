@@ -3,10 +3,15 @@ import { ArrowLeft, PlayCircle, Clock, Flame, Lock } from "lucide-react";
 import { getHomeWorkouts } from "@/app/actions/home-workouts";
 import { currentUser } from "@clerk/nextjs/server";
 import { getUserSubscriptionStatus } from "@/lib/data";
+import { cookies } from "next/headers";
 
 export default async function TreinoEmCasaPage() {
   const workouts = await getHomeWorkouts();
   const user = await currentUser();
+  const cookieStore = await cookies();
+  const leadToken = (await cookieStore).get("fitconnect_lead_token");
+  const isLeadConfirmed = !!leadToken;
+  
   const { status, role } = await getUserSubscriptionStatus(user?.id || "");
   const isPremiumUser = status === "active" || role === "admin";
 
@@ -25,6 +30,19 @@ export default async function TreinoEmCasaPage() {
             <ArrowLeft className="h-4 w-4" />
             Voltar para Escolha de Treino
           </Link>
+          
+          {isLeadConfirmed && !isPremiumUser && (
+            <div className="mb-8 p-6 bg-blue-500/10 border border-blue-500/20 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-1000">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-1">Bem-vindo(a) à sua Aula Experimental! 🎉</h2>
+                <p className="text-white/60 text-sm">Gostou da aula? Libere o acesso completo por um preço especial.</p>
+              </div>
+              <Link href="/#pricing" className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                Garantir Meu Plano Completo
+              </Link>
+            </div>
+          )}
+
           <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter mb-4 text-white uppercase flex items-center gap-3">
             TREINO EM CASA <span className="text-blue-500">HIIT</span>
             <Flame className="h-10 w-10 text-orange-500 animate-pulse" />

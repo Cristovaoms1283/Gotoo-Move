@@ -13,6 +13,8 @@ import {
 import { getUserSubscriptionStatus, getActiveProgram } from "@/lib/data";
 import Link from "next/link";
 import BuyOneOffButton from "@/components/BuyOneOffButton";
+import { syncUser } from "@/app/actions/user";
+import { redirect } from "next/navigation";
 
 const HUB_OPTIONS = [
   {
@@ -66,11 +68,19 @@ const HUB_OPTIONS = [
 ];
 
 export default async function DashboardHubPage() {
-  const user = await currentUser();
-  const { id: dbUserId, status, goal } = await getUserSubscriptionStatus(user?.id || "");
+  const clerkUser = await currentUser();
+  if (!clerkUser) redirect("/sign-in");
+
+  const dbUser = await syncUser();
+  
+  if (!dbUser?.whatsapp || !dbUser?.goal) {
+    redirect("/dashboard/onboarding");
+  }
+
+  const { id: dbUserId, status, goal, isGuest } = await getUserSubscriptionStatus(clerkUser.id);
   const activeProgram = dbUserId ? await getActiveProgram(dbUserId) : null;
 
-  if (status !== "active" && process.env.NODE_ENV === "production") {
+  if (status !== "active" && !isGuest && process.env.NODE_ENV === "production") {
     return (
         <main className="min-h-screen flex items-center justify-center p-6 bg-black">
           <div className="glass p-12 rounded-3xl max-w-md text-center">
@@ -105,7 +115,7 @@ export default async function DashboardHubPage() {
         <header className="flex items-center justify-between mb-16">
           <div>
             <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 uppercase">
-              BEM-VINDO, <span className="text-primary italic">{user?.firstName}</span>!
+              BEM-VINDO, <span className="text-primary italic">{clerkUser?.firstName}</span>!
             </h1>
             <div className="flex items-center gap-3">
                 <span className="bg-primary text-black px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider">

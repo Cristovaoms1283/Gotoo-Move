@@ -61,20 +61,32 @@ export async function getUserSubscriptionStatus(clerkId: string) {
   try {
     const user = await prisma.user.findUnique({
       where: { clerkId },
-      select: { status: true, goal: true, id: true, role: true, fitCoins: true, streak: true, isDeloadActive: true },
+      select: { 
+        status: true, 
+        goal: true, 
+        id: true, 
+        role: true, 
+        fitCoins: true, 
+        streak: true, 
+        isDeloadActive: true, 
+        isGuest: true,
+        whatsapp: true 
+      },
     });
     return {
       id: user?.id,
-      status: user?.status || "inactive",
+      status: user?.isGuest ? "active" : (user?.status || "inactive"),
       goal: user?.goal || null,
       role: user?.role || "user",
       fitCoins: user?.fitCoins || 0,
       streak: user?.streak || 0,
-      isDeloadActive: user?.isDeloadActive || false
+      isDeloadActive: user?.isDeloadActive || false,
+      isGuest: user?.isGuest || false,
+      whatsapp: user?.whatsapp || null
     };
   } catch (error) {
     console.error("Erro ao buscar status da assinatura:", error);
-    return { id: null, status: "inactive", goal: null, role: "user" };
+    return { id: null, status: "inactive", goal: null, role: "user", isGuest: false, whatsapp: null };
   }
 }
 

@@ -1,11 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { PricingSection } from "@/components/PricingSection";
-import { Play, Shield, Zap, TrendingUp } from "lucide-react";
+import { Play, Shield, Zap, TrendingUp, Sparkles } from "lucide-react";
+import { LeadCaptureModal } from "@/components/LeadCaptureModal";
 
 export default function Home() {
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+
   return (
     <main className="min-h-screen">
+      <LeadCaptureModal 
+        isOpen={isLeadModalOpen} 
+        onClose={() => setIsLeadModalOpen(false)} 
+      />
+
       {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="hero-glow" />
@@ -34,13 +45,16 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link href="#pricing" className="btn-premium btn-primary w-full sm:w-auto text-lg">
+            <Link href="#pricing" className="btn-premium btn-primary w-full sm:w-auto text-lg leading-none py-6">
               Escolher Meu Plano
             </Link>
-            <Link href="#demo" className="btn-premium btn-outline w-full sm:w-auto text-lg">
-              <Play className="h-5 w-5 fill-primary" />
-              Ver Demonstração
-            </Link>
+            <button 
+              onClick={() => setIsLeadModalOpen(true)}
+              className="btn-premium btn-outline w-full sm:w-auto text-lg flex items-center justify-center gap-3 py-6 bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 group"
+            >
+              <Sparkles className="h-5 w-5 text-blue-400 group-hover:scale-125 transition-transform" />
+              Aula Experimental Grátis
+            </button>
           </div>
         </div>
 
