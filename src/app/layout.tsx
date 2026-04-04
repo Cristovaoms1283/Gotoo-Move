@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 
 export default function RootLayout({
   children,
@@ -29,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider afterSignOutUrl="/">
+    <ClerkProvider appearance={{ baseTheme: dark }} afterSignOutUrl="/">
       <html lang="pt-BR">
         <body className="antialiased">
           <Toaster position="top-center" richColors theme="dark" />
