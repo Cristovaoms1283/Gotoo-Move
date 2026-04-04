@@ -19,6 +19,7 @@
     "@prisma/client": "^7.6.0",
     "@uploadthing/react": "^7.3.3",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.35.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
