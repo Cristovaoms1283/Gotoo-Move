@@ -49,7 +49,7 @@ export async function registerLead(formData: FormData) {
     const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/leads/confirm?token=${token}`;
 
     const { data, error } = await resend.emails.send({
-      from: 'FitConnect <onboarding@resend.dev>', // Em produção, usar seu domínio
+      from: 'FitConnect <onboarding@gotoostudiofitness.com.br>', // Agora usando o domínio verificado!
       to: [email],
       subject: '🔥 Libere sua Aula Experimental de Treinamento Funcional!',
       html: `
