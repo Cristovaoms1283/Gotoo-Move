@@ -6,6 +6,8 @@ import Stripe from "stripe";
 import { resend } from "@/lib/resend";
 import { SubscriptionFailedEmail } from "@/components/emails/SubscriptionFailed";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = (await headers()).get("Stripe-Signature") as string;
@@ -193,7 +195,7 @@ export async function POST(req: Request) {
     // Enviar e-mail de falha na cobrança
     if (customer.email) {
       await resend.emails.send({
-        from: 'Fit Connect <onboarding@resend.dev>',
+        from: 'Gotoo Move <onboarding@resend.dev>',
         to: customer.email,
         subject: 'Houve um problema com seu pagamento do Fit Connect 💳',
         react: SubscriptionFailedEmail({
