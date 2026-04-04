@@ -15,8 +15,14 @@ export async function GET(req: NextRequest) {
       where: { token },
     });
 
-    if (!lead || lead.expiresAt < new Date()) {
-      return NextResponse.redirect(new URL("/?error=token_invalido", req.url));
+    if (!lead) {
+      console.error(`Link de lead não encontrado para o token: ${token?.substring(0, 8)}...`);
+      return NextResponse.redirect(new URL("/?error=token_nao_encontrado", req.url));
+    }
+
+    if (lead.expiresAt < new Date()) {
+      console.error(`Link de lead expirado. Expira em: ${lead.expiresAt}, Agora: ${new Date()}`);
+      return NextResponse.redirect(new URL("/?error=token_expirado", req.url));
     }
 
     // Marcar como confirmado

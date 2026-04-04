@@ -24,7 +24,7 @@ export async function registerLead(formData: FormData) {
     }
 
     const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 horas para evitar erros de fuso horário
 
     // Salvar ou atualizar o lead
     await prisma.lead.upsert({
