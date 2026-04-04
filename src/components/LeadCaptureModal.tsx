@@ -26,7 +26,12 @@ export function LeadCaptureModal({ isOpen, onClose }: LeadCaptureModalProps) {
 
     if (result.success) {
       setIsSuccess(true);
-      toast.success("E-mail de confirmação enviado!");
+      if (result.warning) {
+        console.warn(result.warning);
+        toast.info("Cadastro realizado! Entraremos em contato via WhatsApp.");
+      } else {
+        toast.success("E-mail de confirmação enviado!");
+      }
     } else {
       toast.error(result.error || "Ocorreu um erro ao processar seu pedido.");
     }

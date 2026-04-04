@@ -89,7 +89,12 @@ export async function registerLead(formData: FormData) {
 
     if (error) {
       console.error("Erro Resend:", error);
-      return { success: false, error: "Falha ao enviar e-mail. Verifique suas credenciais." };
+      // Se falhar o envio de e-mail por restrição de conta (ex: domínio não verificado),
+      // ainda assim consideramos o lead criado como "pendente" para o ADM não perdê-lo.
+      return { 
+        success: true, 
+        warning: "Lead registrado! Porém, o e-mail de confirmação não pôde ser enviado no momento (verifique a configuração do seu domínio no Resend)." 
+      };
     }
 
     return { success: true };
