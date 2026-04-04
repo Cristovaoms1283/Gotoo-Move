@@ -1,0 +1,50 @@
+
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+// Simulando db.ts
+const connectionString = process.env.DATABASE_URL;
+console.log("DATABASE_URL detatils:", connectionString.split('@')[1]);
+
+const pool = new Pool({ 
+  connectionString,
+  ssl: { rejectUnauthorized: false }
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+async function testAdminLogic() {
+  console.log("1. Testando login simulado (role check)...");
+  try {
+    const start = Date.now();
+    // Simulando a query do checkAdmin
+    const user = await prisma.user.findFirst({
+        select: { role: true }
+    });
+    console.log(`User query OK. Role: ${user?.role}. Time: ${Date.now() - start}ms`);
+    
+    console.log("2. Testando queries do Dashboard (counts)...");
+    const startCounts = Date.now();
+    const results = await Promise.all([
+        prisma.user.count(),
+        prisma.workout.count(),
+        prisma.plan.count(),
+        prisma.tip.count(),
+        prisma.nutrition.count(),
+        prisma.recipe.count(),
+    ]);
+    console.log(`Counts OK: ${results.join(", ")}. Time: ${Date.now() - startCounts}ms`);
+    
+    console.log("TESTE FINALIZADO COM SUCESSO");
+  } catch (error) {
+    console.error("ERRO NO TESTE:");
+    console.error(error);
+  } finally {
+    await prisma.$disconnect();
+    await pool.end();
+  }
+}
+
+testAdminLogic();

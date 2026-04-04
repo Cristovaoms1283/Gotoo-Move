@@ -1,0 +1,240 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["fitconnect"]
+}
+
+model User {
+  id               String         @id @default(cuid())
+  clerkId          String         @unique
+  name             String
+  email            String         @unique
+  stripeCustomerId String?        @unique
+  subscriptionId   String?
+  status           String         @default("inactive")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  role             String         @default("user")
+  goal             String?
+  activeProgramId  String?
+  activeProgram    TrainingProgram? @relation(fields: [activeProgramId], references: [id])
+  subscriptions    Subscription[]
+  oneOffPurchases  OneOffPurchase[]
+  
+  // Gamificação e Inteligência
+  fitCoins         Int            @default(0)
+  streak           Int            @default(0)
+  lastWorkoutDate  DateTime?
+  isDeloadActive   Boolean        @default(false)
+  workoutLogs      WorkoutLog[]
+  rewards          UserReward[]
+  exerciseLoads    ExerciseLoad[]
+
+  @@schema("fitconnect")
+}
+
+model WorkoutLog {
+  id          String   @id @default(cuid())
+  userId      String
+  workoutId   String
+  duration    Int      // em minutos
+  effortScale Int      // Escala de Borg (0-10)
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@schema("fitconnect")
+}
+
+model Reward {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  cost        Int          // custo em FitCoins
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userRewards UserReward[]
+
+  @@schema("fitconnect")
+}
+
+model UserReward {
+  id        String   @id @default(cuid())
+  userId    String
+  rewardId  String
+  status    String   @default("pending")
+  claimedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  reward    Reward   @relation(fields: [rewardId], references: [id])
+
+  @@schema("fitconnect")
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  interval      String
+  stripePriceId String         @unique
+  active        Boolean        @default(true)
+  subscriptions Subscription[]
+
+  @@schema("fitconnect")
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  planId               String
+  status               String
+  stripeSubscriptionId String   @unique
+  currentPeriodEnd     DateTime
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  plan                 Plan     @relation(fields: [planId], references: [id])
+  user                 User     @relation(fields: [userId], references: [id])
+
+  @@schema("fitconnect")
+}
+
+model Workout {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  category    String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  exercises        Exercise[]
+  programWorkouts  ProgramWorkout[]
+
+  @@schema("fitconnect")
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  workoutId   String
+  name        String
+  description String?
+  youtubeId   String
+  videoProvider String   @default("youtube")
+  sets        String?
+  reps        String?
+  rest        String?
+  isGironda   Boolean  @default(false)
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseLoads ExerciseLoad[]
+
+  @@schema("fitconnect")
+}
+
+model OneOffPurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  workoutId String?
+  status    String   @default("completed")
+  amount    Float
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@schema("fitconnect")
+}
+
+model Tip {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   @default("musculacao") // "musculacao" | "casa"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("fitconnect")
+}
+
+model Nutrition {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   @default("horarios") // "horarios" | "alimentos" | "glicemico" | "noticias"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("fitconnect")
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  title        String
+  ingredients  String
+  instructions String
+  calories     Int?
+  imageUrl     String?
+  category     String   @default("pre-treino") // "pre-treino" | "low-carb"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@schema("fitconnect")
+}
+
+model TrainingProgram {
+  id           String           @id @default(cuid())
+  title        String
+  description  String?
+  durationDays Int             @default(30)
+  goal         String?         // Ex: "Hipertrofia", "Emagrecimento"
+  workouts     ProgramWorkout[]
+  users        User[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@schema("fitconnect")
+}
+
+model ProgramWorkout {
+  id        String          @id @default(cuid())
+  programId String
+  workoutId String
+  label     String          // ex: "Ficha A"
+  order     Int
+  program   TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workout   Workout         @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@schema("fitconnect")
+}
+
+model HomeWorkout {
+  id          String   @id @default(cuid())
+  title       String
+  instructor  String
+  level       String
+  calories    String
+  youtubeId   String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("fitconnect")
+}
+
+model ExerciseLoad {
+  id          String   @id @default(cuid())
+  userId      String
+  exerciseId  String
+  weight      Float    // A carga em kg
+  unit        String   @default("kg")
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, exerciseId])
+  @@schema("fitconnect")
+}

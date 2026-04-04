@@ -1,0 +1,74 @@
+import axios from 'axios';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Carrega variáveis de ambiente
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const WEBHOOK_URL = 'http://localhost:3000/api/webhooks/stripe';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+
+if (!STRIPE_WEBHOOK_SECRET) {
+  console.error('❌ STRIPE_WEBHOOK_SECRET não encontrado no .env');
+  process.exit(1);
+}
+
+async function simulateWebhook(type: string, object: any) {
+  const payload = JSON.stringify({
+    id: `evt_test_${Math.random().toString(36).substring(7)}`,
+    type: type,
+    data: {
+      object: object
+    },
+    created: Math.floor(Date.now() / 1000),
+  });
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signaturePayload = `${timestamp}.${payload}`;
+  const hmac = crypto
+    .createHmac('sha256', STRIPE_WEBHOOK_SECRET!)
+    .update(signaturePayload)
+    .digest('hex');
+
+  const stripeSignature = `t=${timestamp},v1=${hmac}`;
+
+  try {
+    const response = await axios.post(WEBHOOK_URL, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Stripe-Signature': stripeSignature,
+      },
+    });
+
+    console.log(`✅ Webhook [${type}] enviado com sucesso! Status: ${response.status}`);
+  } catch (error: any) {
+    console.error(`❌ Erro ao enviar webhook [${type}]:`, error.response?.data || error.message);
+  }
+}
+
+// Exemplo de uso: simular checkout.session.completed
+const clerkId = process.argv[2];
+const priceId = process.argv[3] || process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
+
+if (!clerkId) {
+  console.log('\nUso: npx tsx scripts/test-stripe-webhook.ts <CLERK_USER_ID> [PRICE_ID]');
+  process.exit(0);
+}
+
+const mockSession = {
+  id: 'cs_test_123',
+  customer: 'cus_test_123',
+  subscription: 'sub_test_123',
+  metadata: {
+    clerkId: clerkId
+  }
+};
+
+// No fluxo real, o webhook recupera a assinatura para pegar o preço.
+// Como estamos simulando, o script de rota vai tentar fazer retrieval do Stripe.
+// Para um teste puramente local sem API real, teríamos que mockar o stripe.subscriptions.retrieve.
+// Mas aqui vamos disparar o evento e ver como a rota lida com isso.
+
+console.log(`🚀 Simulando checkout para o usuário ${clerkId} com o preço ${priceId}...`);
+simulateWebhook('checkout.session.completed', mockSession);

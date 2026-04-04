@@ -1,0 +1,24 @@
+
+import "dotenv/config";
+import prisma from "./src/lib/db";
+
+async function test() {
+  console.log("Iniciando teste de consulta Prisma...");
+  try {
+    const start = Date.now();
+    const count = await prisma.user.count();
+    console.log(`Sucesso! Total de usuários: ${count}`);
+    console.log(`Tempo de resposta: ${Date.now() - start}ms`);
+  } catch (error) {
+    console.error("Erro detectado no Prisma:");
+    console.error(JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    if (error.cause) {
+        console.error("Causa do erro:");
+        console.error(error.cause);
+    }
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+test();

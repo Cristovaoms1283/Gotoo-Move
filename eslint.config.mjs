@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "*.js", // Ignora scripts de diagnóstico na raiz
+    "*.mjs",
+    "scripts/**",
   ]),
 ]);
 
