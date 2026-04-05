@@ -48,7 +48,7 @@ export default async function AdminDashboard() {
           <p className="text-zinc-400 text-sm mb-6">Controle as fichas de treino, exercícios e bibliotecas de vídeo.</p>
           <div className="flex gap-4">
              <a href="/admin/workouts" className="px-4 py-2 bg-zinc-800 hover:bg-primary hover:text-black rounded-lg text-xs font-black uppercase transition-all italic">Treinos</a>
-             <a href="/admin/programas" className="px-4 py-2 bg-zinc-800 hover:bg-primary hover:text-black rounded-lg text-xs font-black uppercase transition-all italic">Programas</a>
+             <a href="/admin/programs" className="px-4 py-2 bg-zinc-800 hover:bg-primary hover:text-black rounded-lg text-xs font-black uppercase transition-all italic">Programas</a>
           </div>
         </div>
 
