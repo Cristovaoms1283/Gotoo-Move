@@ -41,4 +41,22 @@ export const PLANS = [
     stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPLETO,
     type: "subscription"
   },
+  {
+    id: "combo-runner",
+    name: "Combo Runner",
+    price: "39,90",
+    description: "Corrida + Fortalecimento Híbrido",
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_RUNNER,
+    type: "subscription",
+    goalGroup: "Corrida"
+  },
+  {
+    id: "combo-performance",
+    name: "Combo Performance",
+    price: "59,90",
+    description: "Corrida + Fortalecimento + Funcional",
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PERFORMANCE,
+    type: "subscription",
+    goalGroup: "Corrida"
+  },
 ];

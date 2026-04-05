@@ -10,6 +10,7 @@ const GOALS = [
   "Hipertrofia",
   "Emagrecimento",
   "Recomposição Corporal",
+  "Corrida de Rua",
   "Tenho diabetes ou colesterol alto e hipertrofia",
   "Tenho diabetes e colesterol alto e emagrecimento",
   "Sou hipertenso e Hipertrofia",
@@ -19,7 +20,16 @@ const GOALS = [
 export function PricingSection() {
   const [selectedGoal, setSelectedGoal] = useState(GOALS[0]);
 
+  const filteredPlans = PLANS.filter(plan => {
+    if (selectedGoal === "Corrida de Rua") {
+      return plan.goalGroup === "Corrida" || plan.id === "avulso";
+    }
+    // Para outros objetivos, não mostramos os combos específicos de corrida
+    return !plan.goalGroup || plan.goalGroup !== "Corrida";
+  });
+
   const handleSubscribe = async (plan: typeof PLANS[0]) => {
+    // ... logic remains same ...
     if (!plan.stripePriceId) {
       alert("Configuração de preço pendente no Stripe.");
       return;
@@ -83,8 +93,8 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {PLANS.map((plan, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {filteredPlans.map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
@@ -92,10 +102,10 @@ export function PricingSection() {
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
               className={`glass p-8 rounded-3xl flex flex-col relative ${
-                plan.id === "completo" ? "border-primary/50 ring-2 ring-primary/20 scale-105 z-10" : ""
+                plan.id === "combo-performance" || plan.id === "completo" ? "border-primary/50 ring-2 ring-primary/20 scale-105 z-10" : ""
               }`}
             >
-              {plan.id === "completo" && (
+              {(plan.id === "combo-performance" || plan.id === "completo") && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black text-xs font-bold px-4 py-1 rounded-full uppercase">
                   O Melhor
                 </div>

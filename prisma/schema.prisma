@@ -200,15 +200,19 @@ model Recipe {
 }
 
 model TrainingProgram {
-  id           String           @id @default(cuid())
-  title        String
-  description  String?
-  durationDays Int             @default(30)
-  goal         String?         // Ex: "Hipertrofia", "Emagrecimento"
-  workouts     ProgramWorkout[]
-  users        User[]
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id                 String           @id @default(cuid())
+  title              String
+  description        String?
+  durationDays       Int             @default(30)
+  goal               String?         // Ex: "Hipertrofia", "Emagrecimento"
+  category           String          @default("GYM") // "GYM", "HOME", "RUNNING"
+  subcategory        String?         // "3km", "5km", "10km", etc.
+  level              String?         // "Iniciante", "Intermediário", "Avançado"
+  companionProgramId String?         // ID do programa de fortalecimento vinculado
+  workouts           ProgramWorkout[]
+  users              User[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   @@schema("fitconnect")
 }

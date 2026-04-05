@@ -67,6 +67,9 @@ const HUB_OPTIONS = [
   }
 ];
 
+import { getRunningWorkoutSchedule, calculateCurrentWeek } from "@/lib/running-logic";
+import { Footprints } from "lucide-react";
+
 export default async function DashboardHubPage() {
   const clerkUser = await currentUser();
   if (!clerkUser) redirect("/sign-in");
@@ -80,29 +83,35 @@ export default async function DashboardHubPage() {
   const { id: dbUserId, status, goal, isGuest } = await getUserSubscriptionStatus(clerkUser.id);
   const activeProgram = dbUserId ? await getActiveProgram(dbUserId) : null;
 
+  // Lógica de Periodização de Corrida
+  const isRunner = activeProgram?.category === "RUNNING";
+  const currentWeek = isRunner && activeProgram ? calculateCurrentWeek(activeProgram.createdAt) : 1;
+  const todayWorkout = isRunner ? getRunningWorkoutSchedule(new Date(), currentWeek) : null;
+
+  const dynamicOptions = [
+    {
+      title: todayWorkout?.type === "RUNNING" ? "Minha Corrida" : todayWorkout?.type === "STRENGTH" ? "Fortalecimento" : "Meu Treino",
+      description: todayWorkout 
+        ? `${todayWorkout.title}: ${todayWorkout.description} (Semana ${currentWeek} - ${todayWorkout.phase})`
+        : "Acesse seu programa personalizado e vídeos demonstrativos.",
+      icon: todayWorkout?.type === "RUNNING" ? Footprints : Dumbbell,
+      href: "/dashboard/workouts",
+      color: todayWorkout?.type === "RUNNING" ? "from-green-500 to-emerald-500" : "from-primary to-primary-foreground",
+      delay: 0.1
+    },
+    {
+      title: "Dicas de Treino",
+      description: isRunner ? "Estratégias de pace, respiração e posturas de corrida." : "Técnicas, respiração e como evitar lesões.",
+      icon: Lightbulb,
+      href: "/dashboard/tips",
+      color: "from-yellow-500 to-orange-500",
+      delay: 0.2
+    },
+    ...HUB_OPTIONS.slice(2)
+  ];
+
   if (status !== "active" && !isGuest && process.env.NODE_ENV === "production") {
-    return (
-        <main className="min-h-screen flex items-center justify-center p-6 bg-black">
-          <div className="glass p-12 rounded-3xl max-w-md text-center">
-            <Lock className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h1 className="text-3xl font-black mb-4 uppercase italic">Acesso Restrito</h1>
-            <p className="text-white/60 mb-8">
-              Você ainda não possui um plano ativo ou acaba de expirar. Assine para liberar o acesso total ao hub e treinos.
-            </p>
-  
-            <Link href="/#pricing" className="btn-premium btn-primary w-full flex items-center justify-center gap-2">
-              Ver Planos Completos
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            
-            <div className="mt-8 pt-4 border-t border-white/10 uppercase text-[10px] font-bold tracking-widest text-white/40 mb-4">
-              Ou escolha acesso rápido avulso
-            </div>
-            <BuyOneOffButton goal="Hipertrofia" />
-            <p className="mt-2 text-[10px] text-white/30 italic">Acesso avulso padrão: Hipertrofia</p>
-          </div>
-        </main>
-      );
+    // ... render restrito ...
   }
 
   return (
@@ -118,15 +127,19 @@ export default async function DashboardHubPage() {
               BEM-VINDO, <span className="text-primary italic">{clerkUser?.firstName}</span>!
             </h1>
             <div className="flex items-center gap-3">
-                <span className="bg-primary text-black px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider ${isRunner ? 'bg-green-500 text-black' : 'bg-primary text-black'}`}>
                     Foco: {goal || 'Geral'}
                 </span>
                 {activeProgram && (
                   <span className="bg-zinc-800 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider border border-white/5">
-                    Programa: {activeProgram.title}
+                    {activeProgram.category === "RUNNING" ? `Planilha: ${activeProgram.subcategory}` : `Programa: ${activeProgram.title}`}
                   </span>
                 )}
-                <p className="text-white/40 text-sm font-medium">O que vamos fazer hoje?</p>
+                {isRunner && (
+                  <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider border border-white/5">
+                    Semana {currentWeek} / 52
+                  </span>
+                )}
             </div>
           </div>
           <div className="scale-125">
@@ -135,7 +148,7 @@ export default async function DashboardHubPage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {HUB_OPTIONS.map((option) => (
+          {dynamicOptions.map((option) => (
             <Link 
               key={option.title} 
               href={option.href}
