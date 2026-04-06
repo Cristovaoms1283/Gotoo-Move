@@ -103,9 +103,9 @@ export default async function DashboardHubPage() {
   const dynamicOptions = HUB_OPTIONS.map((option) => {
     // Aplicar travas de acesso
     let isLocked = false;
-    if (option.title === "Meu Treino") isLocked = !access.canGym;
-    if (option.title === "Treino HIIT") isLocked = !access.canHIIT;
-    if (option.title === "Corrida" || option.title.includes("Minha Corrida")) isLocked = !access.canRunning;
+    if (option.title === "Meu Treino") isLocked = !access?.canGym;
+    if (option.title === "Treino HIIT") isLocked = !access?.canHIIT;
+    if (option.title === "Corrida" || option.title.includes("Minha Corrida")) isLocked = !access?.canRunning;
 
     // Customizar o Card de Corrida se for corredor e tiver acesso
     if (option.title === "Corrida" && isRunner && activeProgram && !isLocked) {
