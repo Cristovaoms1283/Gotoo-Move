@@ -19,9 +19,9 @@ import { redirect } from "next/navigation";
 const HUB_OPTIONS = [
   {
     title: "Meu Treino",
-    description: "Acesse seu programa personalizado e vídeos demonstrativos.",
+    description: "Acesse seu programa personalizado e fichas de musculação.",
     icon: Dumbbell,
-    href: "/dashboard/workouts",
+    href: "/dashboard/workouts?type=gym",
     color: "from-primary to-primary-foreground",
     delay: 0.1
   },
@@ -35,9 +35,9 @@ const HUB_OPTIONS = [
   },
   {
     title: "Corrida",
-    description: "Programas e periodização para sua evolução no asfalto.",
+    description: "Planilhas e periodização para sua evolução no asfalto.",
     icon: Footprints,
-    href: "/dashboard/workouts", // O aluno que for corredor e clicar aqui cairá no seu activeProgram de RUNNING
+    href: "/dashboard/workouts?type=running",
     color: "from-green-500 to-emerald-500",
     delay: 0.3
   },
@@ -83,12 +83,17 @@ export default async function DashboardHubPage() {
   if (!clerkUser) redirect("/sign-in");
 
   const dbUser = await syncUser();
+
+  // Pequeno delay para garantir sincronização em dev
+  if (process.env.NODE_ENV !== 'production') {
+    await new Promise(r => setTimeout(r, 500));
+  }
   
   if (!dbUser?.whatsapp || !dbUser?.goal) {
-    redirect("/dashboard/onboarding");
+    console.warn("Perfil incompleto ou não sincronizado.", clerkUser.id);
   }
 
-  const { id: dbUserId, status, goal, isGuest } = await getUserSubscriptionStatus(clerkUser.id);
+  const { id: dbUserId, status, goal, isGuest, access } = await getUserSubscriptionStatus(clerkUser.id);
   const activeProgram = dbUserId ? await getActiveProgram(dbUserId) : null;
 
   // Lógica de Periodização de Corrida Mensal
@@ -96,13 +101,19 @@ export default async function DashboardHubPage() {
   const currentMonth = dbUser?.current_training_month || 1;
 
   const dynamicOptions = HUB_OPTIONS.map((option) => {
-    // Customizar o Card de Corrida se for corredor
-    if (option.title === "Corrida" && isRunner && activeProgram) {
+    // Aplicar travas de acesso
+    let isLocked = false;
+    if (option.title === "Meu Treino") isLocked = !access.canGym;
+    if (option.title === "Treino HIIT") isLocked = !access.canHIIT;
+    if (option.title === "Corrida" || option.title.includes("Minha Corrida")) isLocked = !access.canRunning;
+
+    // Customizar o Card de Corrida se for corredor e tiver acesso
+    if (option.title === "Corrida" && isRunner && activeProgram && !isLocked) {
       return {
         ...option,
         title: `Minha Corrida (Mês ${currentMonth})`,
         description: `Planilha ${activeProgram.subcategory}: ${activeProgram.description?.split(" | ")[0] || "Treino Ativo"}`,
-        // Mantemos o href redirecionando para os treinos dele
+        isLocked
       };
     }
 
@@ -110,16 +121,13 @@ export default async function DashboardHubPage() {
     if (option.title === "Dicas de Treino" && isRunner) {
       return {
         ...option,
-        description: "Estratégias de pace, respiração e posturas de corrida."
+        description: "Estratégias de pace, respiração e posturas de corrida.",
+        isLocked
       };
     }
 
-    return option;
+    return { ...option, isLocked };
   });
-
-  if (status !== "active" && !isGuest && process.env.NODE_ENV === "production") {
-    // ... render restrito ...
-  }
 
   return (
     <main className="min-h-screen pt-32 pb-12 bg-black overflow-hidden relative">
@@ -153,30 +161,32 @@ export default async function DashboardHubPage() {
           {dynamicOptions.map((option) => (
             <Link 
               key={option.title} 
-              href={option.href}
-              className="group relative"
+              href={option.isLocked ? "#" : option.href}
+              className={`group relative ${option.isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
             >
-                <div className="relative glass p-8 rounded-[40px] border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-500 flex flex-col items-start gap-4 overflow-hidden h-full">
-                    {/* Hover Glow */}
-                    <div className={`absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700`} />
+                <div className={`relative glass p-8 rounded-[40px] border border-white/5 bg-white/[0.02] ${!option.isLocked ? 'hover:bg-white/[0.05]' : 'pointer-events-none'} transition-all duration-500 flex flex-col items-start gap-4 overflow-hidden h-full`}>
+                    {!option.isLocked && (
+                      <div className="absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                    )}
                     
-                    <div className="p-4 rounded-2xl bg-white/5 text-primary group-hover:bg-primary group-hover:text-black transition-all duration-500">
-                        <option.icon className="h-8 w-8" />
+                    <div className={`p-4 rounded-2xl bg-white/5 ${option.isLocked ? 'text-white/20' : 'text-primary group-hover:bg-primary group-hover:text-black'} transition-all duration-500`}>
+                        {option.isLocked ? <Lock className="h-8 w-8" /> : <option.icon className="h-8 w-8" />}
                     </div>
                     
                     <div>
-                        <h2 className="text-2xl font-black italic uppercase tracking-tight mb-2 flex items-center gap-2">
+                        <h2 className={`text-2xl font-black italic uppercase tracking-tight mb-2 flex items-center gap-2 ${option.isLocked ? 'text-white/40' : ''}`}>
                             {option.title}
-                            <ArrowRight className="h-5 w-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary" />
+                            {!option.isLocked && <ArrowRight className="h-5 w-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary" />}
+                            {option.isLocked && <Lock className="h-4 w-4 ml-auto text-primary/40" />}
                         </h2>
                         <p className="text-white/40 leading-relaxed text-sm max-w-[280px]">
-                            {option.description}
+                            {option.isLocked ? "Conteúdo não disponível no seu plano atual." : option.description}
                         </p>
                     </div>
 
                     <div className="mt-auto pt-4">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/50 group-hover:text-primary transition-colors">
-                            Acessar Conteúdo
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${option.isLocked ? 'text-white/20' : 'text-primary/50 group-hover:text-primary'} transition-colors italic`}>
+                            {option.isLocked ? "Fazer Upgrade" : "Acessar Conteúdo"}
                         </span>
                     </div>
                 </div>

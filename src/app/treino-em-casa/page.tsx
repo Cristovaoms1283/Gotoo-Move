@@ -12,7 +12,8 @@ export default async function TreinoEmCasaPage() {
   const leadToken = (await cookieStore).get("fitconnect_lead_token");
   const isLeadConfirmed = !!leadToken;
   
-  const { status, role } = await getUserSubscriptionStatus(user?.id || "");
+  const { status, role, access } = await getUserSubscriptionStatus(user?.id || "");
+  const hasHIITAccess = access.canHIIT || role === "admin";
   const isPremiumUser = status === "active" || role === "admin";
 
   return (
@@ -69,7 +70,7 @@ export default async function TreinoEmCasaPage() {
                 
                  <div className="relative z-10 w-full aspect-video rounded-2xl overflow-hidden mb-6 shadow-lg border border-white/10 bg-black">
                    
-                   {index === 0 || isPremiumUser ? (
+                   {index === 0 || hasHIITAccess ? (
                       (() => {
                         const isVideoFile = video.youtubeId?.match(/\.(mp4|webm|mov|ogg)$/i) || video.youtubeId?.includes('uploadthing');
                         const isYouTube = !isVideoFile && video.youtubeId;
