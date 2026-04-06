@@ -26,20 +26,36 @@ const HUB_OPTIONS = [
     delay: 0.1
   },
   {
+    title: "Treino HIIT",
+    description: "Aulas rápidas em casa, sem equipamento.",
+    icon: Flame,
+    href: "/treino-em-casa",
+    color: "from-orange-500 to-red-500",
+    delay: 0.2
+  },
+  {
+    title: "Corrida",
+    description: "Programas e periodização para sua evolução no asfalto.",
+    icon: Footprints,
+    href: "/dashboard/workouts", // O aluno que for corredor e clicar aqui cairá no seu activeProgram de RUNNING
+    color: "from-green-500 to-emerald-500",
+    delay: 0.3
+  },
+  {
     title: "Dicas de Treino",
     description: "Técnicas, respiração e como evitar lesões.",
     icon: Lightbulb,
     href: "/dashboard/tips",
     color: "from-yellow-500 to-orange-500",
-    delay: 0.2
+    delay: 0.4
   },
   {
     title: "Alimentação",
     description: "Dicas nutricionais para potencializar seu resultado.",
     icon: Apple,
     href: "/dashboard/nutrition",
-    color: "from-green-500 to-emerald-500",
-    delay: 0.3
+    color: "from-green-400 to-emerald-400",
+    delay: 0.5
   },
   {
     title: "Receitas Fitness",
@@ -47,15 +63,7 @@ const HUB_OPTIONS = [
     icon: UtensilsCrossed,
     href: "/dashboard/recipes",
     color: "from-red-500 to-pink-500",
-    delay: 0.4
-  },
-  {
-    title: "Treino HIIT",
-    description: "Aulas rápidas em casa, sem equipamento.",
-    icon: Flame,
-    href: "/treino-em-casa",
-    color: "from-orange-500 to-red-500",
-    delay: 0.5
+    delay: 0.6
   },
   {
     title: "Recompensas",
@@ -63,7 +71,7 @@ const HUB_OPTIONS = [
     icon: Trophy,
     href: "/dashboard/rewards",
     color: "from-primary to-orange-500",
-    delay: 0.6
+    delay: 0.7
   }
 ];
 
@@ -83,32 +91,31 @@ export default async function DashboardHubPage() {
   const { id: dbUserId, status, goal, isGuest } = await getUserSubscriptionStatus(clerkUser.id);
   const activeProgram = dbUserId ? await getActiveProgram(dbUserId) : null;
 
-  // Lógica de Periodização de Corrida
+  // Lógica de Periodização de Corrida Mensal
   const isRunner = activeProgram?.category === "RUNNING";
-  const currentWeek = isRunner && activeProgram ? calculateCurrentWeek(activeProgram.createdAt) : 1;
-  const todayWorkout = isRunner ? getRunningWorkoutSchedule(new Date(), currentWeek) : null;
+  const currentMonth = dbUser?.current_training_month || 1;
 
-  const dynamicOptions = [
-    {
-      title: todayWorkout?.type === "RUNNING" ? "Minha Corrida" : todayWorkout?.type === "STRENGTH" ? "Fortalecimento" : "Meu Treino",
-      description: todayWorkout 
-        ? `${todayWorkout.title}: ${todayWorkout.description} (Semana ${currentWeek} - ${todayWorkout.phase})`
-        : "Acesse seu programa personalizado e vídeos demonstrativos.",
-      icon: todayWorkout?.type === "RUNNING" ? Footprints : Dumbbell,
-      href: "/dashboard/workouts",
-      color: todayWorkout?.type === "RUNNING" ? "from-green-500 to-emerald-500" : "from-primary to-primary-foreground",
-      delay: 0.1
-    },
-    {
-      title: "Dicas de Treino",
-      description: isRunner ? "Estratégias de pace, respiração e posturas de corrida." : "Técnicas, respiração e como evitar lesões.",
-      icon: Lightbulb,
-      href: "/dashboard/tips",
-      color: "from-yellow-500 to-orange-500",
-      delay: 0.2
-    },
-    ...HUB_OPTIONS.slice(2)
-  ];
+  const dynamicOptions = HUB_OPTIONS.map((option) => {
+    // Customizar o Card de Corrida se for corredor
+    if (option.title === "Corrida" && isRunner && activeProgram) {
+      return {
+        ...option,
+        title: `Minha Corrida (Mês ${currentMonth})`,
+        description: `Planilha ${activeProgram.subcategory}: ${activeProgram.description?.split(" | ")[0] || "Treino Ativo"}`,
+        // Mantemos o href redirecionando para os treinos dele
+      };
+    }
+
+    // Customizar Dicas
+    if (option.title === "Dicas de Treino" && isRunner) {
+      return {
+        ...option,
+        description: "Estratégias de pace, respiração e posturas de corrida."
+      };
+    }
+
+    return option;
+  });
 
   if (status !== "active" && !isGuest && process.env.NODE_ENV === "production") {
     // ... render restrito ...
@@ -132,12 +139,7 @@ export default async function DashboardHubPage() {
                 </span>
                 {activeProgram && (
                   <span className="bg-zinc-800 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider border border-white/5">
-                    {activeProgram.category === "RUNNING" ? `Planilha: ${activeProgram.subcategory}` : `Programa: ${activeProgram.title}`}
-                  </span>
-                )}
-                {isRunner && (
-                  <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase italic tracking-wider border border-white/5">
-                    Semana {currentWeek} / 52
+                    {activeProgram.category === "RUNNING" ? `Planilha Mês ${currentMonth}` : `Programa: ${activeProgram.title}`}
                   </span>
                 )}
             </div>

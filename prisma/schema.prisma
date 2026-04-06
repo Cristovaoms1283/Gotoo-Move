@@ -32,6 +32,7 @@ model User {
   streak           Int            @default(0)
   lastWorkoutDate  DateTime?
   isDeloadActive   Boolean        @default(false)
+  current_training_month Int      @default(1)
   workoutLogs      WorkoutLog[]
   rewards          UserReward[]
   exerciseLoads    ExerciseLoad[]
@@ -208,6 +209,7 @@ model TrainingProgram {
   category           String          @default("GYM") // "GYM", "HOME", "RUNNING"
   subcategory        String?         // "3km", "5km", "10km", etc.
   level              String?         // "Iniciante", "Intermediário", "Avançado"
+  month              Int?            // Especifico para a periodizacao anual
   companionProgramId String?         // ID do programa de fortalecimento vinculado
   workouts           ProgramWorkout[]
   users              User[]

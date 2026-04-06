@@ -149,25 +149,42 @@ export async function POST(req: Request) {
       });
 
       const user = await prisma.user.findUnique({
-        where: { stripeCustomerId: invoice.customer as string }
+        where: { stripeCustomerId: invoice.customer as string },
+        include: { activeProgram: true }
       });
 
       if (user) {
         let activeProgramId = user.activeProgramId;
+        let currentMonth = user.current_training_month;
 
         // Avanço na periodização (ciclo de renovação a cada 30 dias)
-        if (invoice.billing_reason === "subscription_cycle" && user.goal) {
-          const allPrograms = await prisma.trainingProgram.findMany({
-            where: { goal: user.goal },
-            orderBy: { createdAt: 'asc' }
-          });
+        if (invoice.billing_reason === "subscription_cycle") {
+          if (user.activeProgram?.category === "RUNNING" && user.activeProgram?.subcategory) {
+            // Progressão de Corrida (1 a 12 meses)
+            currentMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
+            
+            const nextProgram = await prisma.trainingProgram.findFirst({
+              where: {
+                category: "RUNNING",
+                subcategory: user.activeProgram.subcategory,
+                month: currentMonth
+              }
+            });
+            if (nextProgram) activeProgramId = nextProgram.id;
+          } else if (user.goal) {
+            // Lógica antiga (Musculação/Emagrecimento Geral)
+            const allPrograms = await prisma.trainingProgram.findMany({
+              where: { goal: user.goal },
+              orderBy: { createdAt: 'asc' }
+            });
 
-          if (allPrograms.length > 0) {
-            const currentIndex = allPrograms.findIndex(p => p.id === activeProgramId);
-            if (currentIndex !== -1 && currentIndex < allPrograms.length - 1) {
-              activeProgramId = allPrograms[currentIndex + 1].id; // Mês N+1
-            } else {
-              activeProgramId = allPrograms[0].id; // Retorna para o Mês 1 se algo falhar ou terminar os 12
+            if (allPrograms.length > 0) {
+              const currentIndex = allPrograms.findIndex(p => p.id === activeProgramId);
+              if (currentIndex !== -1 && currentIndex < allPrograms.length - 1) {
+                activeProgramId = allPrograms[currentIndex + 1].id; // Mês N+1
+              } else {
+                activeProgramId = allPrograms[0].id; // Retorna para o Mês 1 se algo falhar ou terminar os 12
+              }
             }
           }
         }
@@ -176,7 +193,8 @@ export async function POST(req: Request) {
           where: { id: user.id },
           data: { 
             status: "active",
-            activeProgramId
+            activeProgramId,
+            current_training_month: currentMonth
           },
         });
       }
