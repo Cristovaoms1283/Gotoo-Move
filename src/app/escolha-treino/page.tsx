@@ -16,17 +16,27 @@ const RUNNING_OPTIONS = [
 import { updateUserRunningGoal } from "../actions/running";
 
 export default function EscolhaTreinoPage() {
-  const [step, setStep] = useState<"category" | "distance">("category");
+  const [step, setStep] = useState<"category" | "distance" | "gym_goal">("category");
   const [selectedDistance, setSelectedDistance] = useState("");
+  const [gymGoal, setGymGoal] = useState("");
   const [levelInfo, setLevelInfo] = useState({ time5k: "", time10k: "" });
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
-  const handleSelectDistance = async (id: string, advance = false) => {
+  const GOALS = [
+    { id: "hipertrofia", label: "Hipertrofia", description: "Foco em massa muscular." },
+    { id: "emagrecimento", label: "Emagrecimento", description: "Foco em definição." },
+    { id: "condicionamento", label: "Condicionamento", description: "Foco em resistência." },
+    { id: "reabilitacao", label: "Reabilitação", description: "Foco em recuperação." },
+  ];
+
+  const handleFinishRunningSetup = async (advance = false) => {
+    if (!gymGoal) return;
     setIsPending(true);
     try {
       await updateUserRunningGoal({
-        distance: id,
+        distance: selectedDistance,
+        gymGoal: gymGoal,
         time5k: advance ? levelInfo.time5k : undefined,
         time10k: advance ? levelInfo.time10k : undefined,
       });
@@ -37,9 +47,65 @@ export default function EscolhaTreinoPage() {
     }
   };
 
-  const handleConfirmAdvance = () => {
-    handleSelectDistance("12km+", true);
+  const handleSelectDistance = (id: string) => {
+    setSelectedDistance(id);
+    setStep("gym_goal");
   };
+
+  const handleConfirmAdvance = () => {
+    setStep("gym_goal");
+  };
+
+  if (step === "gym_goal") {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-6 bg-black relative overflow-hidden font-sans">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-10" />
+        <div className="max-w-4xl w-full z-10 relative">
+          <button 
+            onClick={() => setStep("distance")}
+            className="flex items-center gap-2 text-white/60 hover:text-primary transition-colors mb-8 group"
+          >
+            <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            VOLTAR PARA DISTÂNCIA
+          </button>
+
+          <header className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter mb-4 text-white uppercase">
+              SEU FORTALECIMENTO NA <span className="text-primary italic">ACADEMIA</span>
+            </h1>
+            <p className="text-white/60 text-lg">Qual o seu objetivo principal na musculação para acompanhar a corrida?</p>
+          </header>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+            {GOALS.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setGymGoal(opt.label)}
+                className={`relative p-6 rounded-[25px] border transition-all text-left ${
+                  gymGoal === opt.label 
+                    ? "bg-primary border-primary text-black" 
+                    : "bg-white/[0.03] border-white/10 text-white hover:border-primary/50"
+                }`}
+              >
+                <h3 className="text-xl font-black italic uppercase mb-1">{opt.label}</h3>
+                <p className={`text-sm ${gymGoal === opt.label ? "text-black/70" : "text-white/40"}`}>
+                  {opt.description}
+                </p>
+              </button>
+            ))}
+          </div>
+
+          <button 
+            onClick={() => handleFinishRunningSetup(selectedDistance === "12km+")}
+            disabled={!gymGoal || isPending}
+            className="w-full py-5 bg-white hover:bg-primary text-black font-black uppercase text-xl rounded-2xl transition-all disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {isPending ? "Configurando..." : "Finalizar Periodização Mensal"}
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   if (step === "distance") {
     return (

@@ -52,24 +52,52 @@ export async function POST(req: Request) {
     
     // Find matching program based on goal and periodization logic
     let activeProgramId = user.activeProgramId;
-    if (finalGoal) {
-      const allPrograms = await prisma.trainingProgram.findMany({
-        where: { goal: finalGoal },
-        orderBy: { createdAt: 'asc' }
-      });
+    let runningProgramId = user.runningProgramId;
 
-      if (allPrograms.length > 0) {
-        if (session.mode === "payment") {
-          // Pagamento avulso: Programa aleatório do objetivo
-          const randomIndex = Math.floor(Math.random() * allPrograms.length);
-          activeProgramId = allPrograms[randomIndex].id;
-        } else if (session.mode === "subscription") {
-          // Nova assinatura: Atribui Mês 1 se o aluno já não estiver na trilha desse objetivo
-          const hasProgramForThisGoal = user.activeProgramId 
-            ? allPrograms.some(p => p.id === user.activeProgramId)
-            : false;
-          if (!hasProgramForThisGoal) {
-            activeProgramId = allPrograms[0].id; // Mês 1
+    const stripePriceId = session.mode === "subscription" 
+      ? (session.metadata?.priceId || (await stripe.subscriptions.retrieve(session.subscription as string).catch(() => null))?.items.data[0].price.id)
+      : (session.metadata?.priceId || session.metadata?.price_id);
+
+    const plan = stripePriceId 
+      ? await prisma.plan.findUnique({ where: { stripePriceId } }) 
+      : null;
+    
+    const planId = plan?.id || "default";
+
+    const isHybrid = planId.includes("runner") || planId.includes("performance") || planId.includes("completo");
+
+    if (finalGoal) {
+      if (isHybrid) {
+        // Lógica Híbrida: Tentar separar Musculação e Corrida
+        const gymPrograms = await prisma.trainingProgram.findMany({
+          where: { category: "GYM" },
+          orderBy: { createdAt: 'asc' }
+        });
+        const runningPrograms = await prisma.trainingProgram.findMany({
+          where: { category: "RUNNING", month: 1 },
+          orderBy: { createdAt: 'asc' }
+        });
+
+        // Tenta achar musculação por objetivo (ex: Hipertrofia)
+        const gymPart = gymPrograms.find(p => finalGoal.toLowerCase().includes(p.goal?.toLowerCase() || "")) || gymPrograms[0];
+        // Tenta achar corrida por objetivo (ex: 5km)
+        const runningPart = runningPrograms.find(p => finalGoal.toLowerCase().includes(p.goal?.toLowerCase() || "")) || runningPrograms[0];
+
+        activeProgramId = gymPart?.id || null;
+        runningProgramId = runningPart?.id || null;
+      } else {
+        // Lógica Simples (Original)
+        const allPrograms = await prisma.trainingProgram.findMany({
+          where: { goal: finalGoal },
+          orderBy: { createdAt: 'asc' }
+        });
+
+        if (allPrograms.length > 0) {
+          if (session.mode === "payment") {
+            const randomIndex = Math.floor(Math.random() * allPrograms.length);
+            activeProgramId = allPrograms[randomIndex].id;
+          } else {
+            activeProgramId = allPrograms[0].id;
           }
         }
       }
@@ -77,35 +105,41 @@ export async function POST(req: Request) {
 
     // Caso seja Assinatura
     if (session.mode === "subscription") {
-      const subscription = await stripe.subscriptions.retrieve(
-        session.subscription as string
-      );
+      let subId = session.subscription as string;
+      let currentPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 dias
 
-      // Atualiza status do usuário e objetivo e programa ativo
+      if (subId) {
+        const subscription = await stripe.subscriptions.retrieve(subId).catch(() => null);
+        if (subscription) {
+          currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
+        }
+      }
+
       await prisma.user.update({
         where: { id: user.id },
         data: {
           stripeCustomerId: session.customer as string,
-          subscriptionId: subscription.id,
+          subscriptionId: subId,
           status: "active",
           goal: finalGoal,
           activeProgramId,
+          runningProgramId,
         },
       });
 
       // Registra ou atualiza a assinatura
       await prisma.subscription.upsert({
-        where: { stripeSubscriptionId: subscription.id },
+        where: { stripeSubscriptionId: subId || "test_sub" },
         create: {
           userId: user.id,
-          planId: (await prisma.plan.findUnique({ where: { stripePriceId: subscription.items.data[0].price.id } }))?.id || "default",
+          planId: planId,
           status: "active",
-          stripeSubscriptionId: subscription.id,
-          currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+          stripeSubscriptionId: subId || "test_sub",
+          currentPeriodEnd: currentPeriodEnd,
         },
         update: {
           status: "active",
-          currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+          currentPeriodEnd: currentPeriodEnd,
         },
       });
     } 
@@ -134,8 +168,8 @@ export async function POST(req: Request) {
 
   // 2. Pagamento de Fatura Bem Sucedido (Renovação)
   if (event.type === "invoice.payment_succeeded") {
-    const invoice = event.data.object as Stripe.Invoice;
-    const subscriptionId = (invoice as any).subscription as string;
+    const invoice = event.data.object as any;
+    const subscriptionId = invoice.subscription as string;
 
     if (subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -155,37 +189,38 @@ export async function POST(req: Request) {
 
       if (user) {
         let activeProgramId = user.activeProgramId;
+        let runningProgramId = user.runningProgramId;
         let currentMonth = user.current_training_month;
 
         // Avanço na periodização (ciclo de renovação a cada 30 dias)
         if (invoice.billing_reason === "subscription_cycle") {
-          if (user.activeProgram?.category === "RUNNING" && user.activeProgram?.subcategory) {
-            // Progressão de Corrida (1 a 12 meses)
-            currentMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
-            
-            const nextProgram = await prisma.trainingProgram.findFirst({
-              where: {
-                category: "RUNNING",
-                subcategory: user.activeProgram.subcategory,
-                month: currentMonth
-              }
-            });
-            if (nextProgram) activeProgramId = nextProgram.id;
-          } else if (user.goal) {
-            // Lógica antiga (Musculação/Emagrecimento Geral)
-            const allPrograms = await prisma.trainingProgram.findMany({
-              where: { goal: user.goal },
-              orderBy: { createdAt: 'asc' }
-            });
+          currentMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
 
-            if (allPrograms.length > 0) {
-              const currentIndex = allPrograms.findIndex(p => p.id === activeProgramId);
-              if (currentIndex !== -1 && currentIndex < allPrograms.length - 1) {
-                activeProgramId = allPrograms[currentIndex + 1].id; // Mês N+1
-              } else {
-                activeProgramId = allPrograms[0].id; // Retorna para o Mês 1 se algo falhar ou terminar os 12
-              }
-            }
+          // Atualiza Programa de Musculação
+          if (user.activeProgram && user.activeProgram.category === "GYM") {
+             const nextGym = await prisma.trainingProgram.findFirst({
+               where: {
+                 category: "GYM",
+                 goal: user.activeProgram.goal,
+                 month: currentMonth
+               }
+             });
+             if (nextGym) activeProgramId = nextGym.id;
+          }
+
+          // Atualiza Programa de Corrida
+          if (user.runningProgramId) {
+             const currentRunning = await prisma.trainingProgram.findUnique({ where: { id: user.runningProgramId } });
+             if (currentRunning) {
+               const nextRunning = await prisma.trainingProgram.findFirst({
+                 where: {
+                   category: "RUNNING",
+                   subcategory: currentRunning.subcategory,
+                   month: currentMonth
+                 }
+               });
+               if (nextRunning) runningProgramId = nextRunning.id;
+             }
           }
         }
 
@@ -194,6 +229,7 @@ export async function POST(req: Request) {
           data: { 
             status: "active",
             activeProgramId,
+            runningProgramId,
             current_training_month: currentMonth
           },
         });

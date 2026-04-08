@@ -13,7 +13,7 @@ export default async function TreinoEmCasaPage() {
   const isLeadConfirmed = !!leadToken;
   
   const { status, role, access } = await getUserSubscriptionStatus(user?.id || "");
-  const hasHIITAccess = access.canHIIT || role === "admin";
+  const hasHIITAccess = access?.canHIIT || role === "admin";
   const isPremiumUser = status === "active" || role === "admin";
 
   return (

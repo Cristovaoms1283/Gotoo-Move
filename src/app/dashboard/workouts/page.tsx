@@ -17,7 +17,7 @@ export default async function WorkoutsPage({
   const { sheet, type = "gym" } = await searchParams; // Default to 'gym'
 
   // Validar permissão específica por tipo
-  const hasAccessToType = type === 'running' ? access.canRunning : access.canGym;
+  const hasAccessToType = type === 'running' ? access?.canRunning : access?.canGym;
 
   if ((status !== "active" || !hasAccessToType) && process.env.NODE_ENV === "production") {
     return (
@@ -139,7 +139,7 @@ export default async function WorkoutsPage({
           <WorkoutClientView 
             workout={selectedWorkout.workout} 
             selectedLabel={selectedWorkout.label} 
-            userId={dbUserId!}
+            userId={dbUserId || ""}
             isDeloadActive={!!isDeloadActive}
             lastLoads={lastLoads}
           />

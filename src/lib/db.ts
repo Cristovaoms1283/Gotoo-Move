@@ -7,7 +7,10 @@ const connectionString = `${process.env.DATABASE_URL}`;
 
 const pool = new Pool({ 
   connectionString,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 5, // Limita o número de conexões simultâneas
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 const adapter = new PrismaPg(pool);

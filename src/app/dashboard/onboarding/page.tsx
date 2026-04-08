@@ -9,6 +9,7 @@ import { useState } from "react";
 const GOALS = [
   { id: "hipertrofia", label: "Hipertrofia", description: "Foco em ganho de massa muscular." },
   { id: "emagrecimento", label: "Emagrecimento", description: "Foco em queima de gordura e definição." },
+  { id: "corrida", label: "Corrida de Rua", description: "Melhorar fôlego, distância ou velocidade." },
   { id: "condicionamento", label: "Condicionamento", description: "Foco em saúde e resistência física." },
   { id: "reabilitacao", label: "Reabilitação", description: "Foco em recuperação e mobilidade." },
 ];
@@ -16,6 +17,14 @@ const GOALS = [
 export default function OnboardingPage() {
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+
+  const DISTANCES = [
+    { id: "5k", label: "5km" },
+    { id: "10k", label: "10km" },
+    { id: "21k", label: "21km" },
+    { id: "42k", label: "42km (Maratona)" },
+  ];
 
   return (
     <main className="min-h-screen bg-black flex items-center justify-center p-6 pt-32">
@@ -31,6 +40,7 @@ export default function OnboardingPage() {
 
         <div className="mb-10">
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-4 block">Bem-vindo(a), {user?.firstName}! ✨</span>
+          <p className="text-white/20 text-[8px] mb-4">DEBUG ID: {user?.id}</p>
           <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white mb-4">
             COMPLETE SEU <br />
             <span className="text-blue-500">PERFIL</span>
@@ -44,7 +54,12 @@ export default function OnboardingPage() {
           setIsSubmitting(true);
           try {
             await updateUserProfile(formData);
-          } catch (e) {
+          } catch (e: any) {
+            // Rethrow redirect errors (Next.js internals)
+            if (e && (e.message === 'NEXT_REDIRECT' || e.digest?.includes('NEXT_REDIRECT'))) {
+              throw e;
+            }
+            console.error("Erro no onboarding:", e);
             setIsSubmitting(false);
           }
         }} className="space-y-8">
@@ -85,6 +100,7 @@ export default function OnboardingPage() {
                     value={goal.label} 
                     className="sr-only peer"
                     required
+                    onChange={(e) => setSelectedGoal(e.target.value)}
                   />
                   <div className="h-full p-5 rounded-3xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-all duration-300">
                     <p className="font-black italic uppercase tracking-tight text-white mb-1 group-hover:translate-x-1 transition-transform peer-checked:text-black">
@@ -98,6 +114,37 @@ export default function OnboardingPage() {
               ))}
             </div>
           </div>
+
+          {/* Target Distance (Visible if Running) */}
+          {selectedGoal === "Corrida de Rua" && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="space-y-6 pt-4 border-t border-white/5"
+            >
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 flex items-center gap-2">
+                <ArrowRight className="h-3 w-3" />
+                Qual distância você quer treinar?
+              </label>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {DISTANCES.map((dist) => (
+                  <label key={dist.id} className="relative cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="targetDistance" 
+                      value={dist.label} 
+                      required
+                      className="sr-only peer"
+                    />
+                    <div className="p-4 text-center rounded-2xl border border-white/5 bg-white/[0.02] peer-checked:bg-white peer-checked:text-black transition-all">
+                      <span className="text-sm font-black italic uppercase">{dist.label}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           <div className="pt-6">
             <button 

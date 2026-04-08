@@ -56,13 +56,14 @@ async function simulateWebhook(type, object) {
 const eventType = process.argv[2] || 'checkout.session.completed';
 const clerkId = process.argv[3];
 const mode = process.argv[4] || 'subscription';
+const goal = process.argv[5] || 'Hipertrofia + Corrida 5km';
+const priceId = process.argv[6] || process.env.NEXT_PUBLIC_STRIPE_PRICE_RUNNER || 'price_1TJDJvIdzwQv3GAtvZ1KGcnT';
 
 if (!clerkId) {
-  console.log('\nUso: node scripts/test-stripe-webhook.js <EVENT_TYPE> <CLERK_USER_ID> [MODE]');
+  console.log('\nUso: node scripts/test-stripe-webhook.js <EVENT_TYPE> <CLERK_USER_ID> [MODE] [GOAL] [PRICE_ID]');
   console.log('Exemplos:');
-  console.log('  node scripts/test-stripe-webhook.js checkout.session.completed manual_admin subscription');
-  console.log('  node scripts/test-stripe-webhook.js checkout.session.completed manual_admin payment');
-  console.log('  node scripts/test-stripe-webhook.js customer.subscription.deleted manual_admin');
+  console.log('  node scripts/test-stripe-webhook.js checkout.session.completed user_2n... subscription "Combo Runner" price_...');
+  console.log('  node scripts/test-stripe-webhook.js checkout.session.completed user_2n... payment "Hipertrofia"');
   process.exit(0);
 }
 
@@ -71,12 +72,14 @@ let mockObject;
 if (eventType === 'checkout.session.completed') {
   mockObject = {
     id: 'cs_test_123',
-    customer: 'cus_U6wkGuikm2h6f1',
-    subscription: mode === 'subscription' ? 'sub_1T8iqbIdzwQv3GAt5wJq1Lkz' : null,
+    customer: `cus_test_${Math.random().toString(36).substring(7)}`,
+    subscription: mode === 'subscription' ? `sub_test_${Math.random().toString(36).substring(7)}` : null,
     mode: mode,
-    amount_total: 500, // R$ 5,00
+    amount_total: 3990, // R$ 39,90
     metadata: {
       clerkId: clerkId,
+      goal: goal,
+      priceId: priceId,
       type: mode === 'payment' ? 'one_time_workout' : 'subscription'
     }
   };
@@ -91,12 +94,13 @@ if (eventType === 'checkout.session.completed') {
     id: 'in_test_123',
     customer: 'cus_U6wkGuikm2h6f1',
     subscription: 'sub_1T8iqbIdzwQv3GAt5wJq1Lkz',
-    status: 'paid'
+    status: 'paid',
+    billing_reason: 'subscription_cycle'
   };
 } else {
   console.error(`❌ Tipo de evento não suportado no mock: ${eventType}`);
   process.exit(1);
 }
 
-console.log(`🚀 Simulando evento [${eventType}] (modo: ${mode}) para o usuário ${clerkId}...`);
+console.log(`🚀 Simulando evento [${eventType}] (modo: ${mode}, goal: ${goal}) para o usuário ${clerkId}...`);
 simulateWebhook(eventType, mockObject);

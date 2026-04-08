@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 
 export async function updateUserRunningGoal(data: {
   distance: string;
+  gymGoal?: string;
   time5k?: string;
   time10k?: string;
 }) {
@@ -29,11 +30,38 @@ export async function updateUserRunningGoal(data: {
     },
   });
 
+  // Buscar o programa de ginásio correspondente se houver gymGoal
+  let gymProgramId = undefined;
+  if (data.gymGoal) {
+    // Tenta buscar o programa específico do mês
+    let gymProgram = await prisma.trainingProgram.findFirst({
+      where: {
+        category: "GYM",
+        goal: data.gymGoal,
+        month: user.current_training_month || 1
+      }
+    });
+
+    // Fallback: busca por programa sem mês definido (caso geral)
+    if (!gymProgram) {
+      gymProgram = await prisma.trainingProgram.findFirst({
+        where: {
+          category: "GYM",
+          goal: data.gymGoal,
+          month: null
+        }
+      });
+    }
+
+    gymProgramId = gymProgram?.id;
+  }
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      goal: `Corrida ${data.distance}`,
-      activeProgramId: runningProgram?.id,
+      goal: data.gymGoal || `Corrida ${data.distance}`,
+      activeProgramId: gymProgramId,
+      runningProgramId: runningProgram?.id,
       // Aqui poderíamos salvar os tempos de 5k/10k em um campo de metadados se existisse, 
       // mas no momento vamos focar na ativação do plano.
     },

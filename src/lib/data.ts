@@ -141,7 +141,16 @@ export async function getUserSubscriptionStatus(clerkId: string) {
     };
   } catch (error) {
     console.error("Erro ao buscar status da assinatura:", error);
-    return { id: null, status: "inactive", goal: null, role: "user", isGuest: false, whatsapp: null };
+    return { 
+      id: null, 
+      status: "inactive", 
+      goal: null, 
+      role: "user", 
+      isGuest: false, 
+      whatsapp: null,
+      planName: "Nenhum",
+      access: { canGym: false, canHIIT: false, canRunning: false }
+    };
   }
 }
 

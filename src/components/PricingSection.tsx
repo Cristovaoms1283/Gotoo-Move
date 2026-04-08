@@ -21,11 +21,14 @@ export function PricingSection() {
   const [selectedGoal, setSelectedGoal] = useState(GOALS[0]);
 
   const filteredPlans = PLANS.filter(plan => {
+    // Se o objetivo selecionado for Corrida, priorizamos os planos de corrida e o avulso
     if (selectedGoal === "Corrida de Rua") {
       return plan.goalGroup === "Corrida" || plan.id === "avulso";
     }
-    // Para outros objetivos, não mostramos os combos específicos de corrida
-    return !plan.goalGroup || plan.goalGroup !== "Corrida";
+    
+    // Para outros objetivos, mostramos todos os planos de musculação/funcional
+    // E também incluímos os combos de corrida, pois eles abrangem musculação
+    return true;
   });
 
   const handleSubscribe = async (plan: typeof PLANS[0]) => {
