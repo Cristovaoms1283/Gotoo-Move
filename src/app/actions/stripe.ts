@@ -5,10 +5,11 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function createCheckoutSession(priceId: string, goal: string) {
+  console.log(`[STRIPE_ACTION] Iniciando createCheckoutSession - PriceID: ${priceId} | Goal: ${goal}`);
   try {
     const { userId } = await auth();
     const user = await currentUser();
-    console.log(`[STRIPE_ACTION] Subscription - AuthID: ${userId || 'Nulo'} | UserID: ${user?.id || 'Nulo'}`);
+    console.log(`[STRIPE_ACTION] Subscription - User: ${user?.id || 'DESLOGADO'}`);
 
     if (!userId || !user) {
       return { error: "AUTH_REQUIRED", url: "/sign-in" };
@@ -28,6 +29,7 @@ export async function createCheckoutSession(priceId: string, goal: string) {
       metadata: { clerkId: userId, goal },
     });
 
+    console.log(`[STRIPE_ACTION] Sessão criada: ${session.id}`);
     return { url: session.url };
   } catch (error: any) {
     console.error("[STRIPE_ACTION] Erro:", error.message);
@@ -36,10 +38,11 @@ export async function createCheckoutSession(priceId: string, goal: string) {
 }
 
 export async function createOneOffCheckoutSession(goal: string, priceId?: string) {
+  console.log(`[STRIPE_ACTION] Iniciando createOneOffCheckoutSession - Goal: ${goal} | PriceID: ${priceId}`);
   try {
     const { userId } = await auth();
     const user = await currentUser();
-    console.log(`[STRIPE_ACTION] OneOff - AuthID: ${userId || 'Nulo'} | UserID: ${user?.id || 'Nulo'} | PriceID: ${priceId}`);
+    console.log(`[STRIPE_ACTION] OneOff - User: ${user?.id || 'DESLOGADO'}`);
 
     if (!userId || !user) {
       return { error: "AUTH_REQUIRED", url: "/sign-in" };

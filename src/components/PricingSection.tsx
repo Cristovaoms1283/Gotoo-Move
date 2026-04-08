@@ -18,6 +18,7 @@ const GOALS = [
 ];
 
 export function PricingSection() {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [selectedGoal, setSelectedGoal] = useState(GOALS[0]);
 
   const filteredPlans = PLANS.filter(plan => {
@@ -32,21 +33,29 @@ export function PricingSection() {
   });
 
   const handleSubscribe = async (plan: typeof PLANS[0]) => {
-    // ... logic remains same ...
+    if (loadingPlan) return;
+    
     if (!plan.stripePriceId) {
       alert("Configuração de preço pendente no Stripe.");
       return;
     }
+
+    setLoadingPlan(plan.id);
+    console.log(`[PRICING] Iniciando checkout para plano: ${plan.id} | Tipo: ${plan.type}`);
     
     try {
       const isOneOff = plan.type === "one_time";
       let result;
 
       if (isOneOff) {
+        console.log(`[PRICING] Chamando createOneOffCheckoutSession...`);
         result = await createOneOffCheckoutSession(selectedGoal, plan.stripePriceId);
       } else {
+        console.log(`[PRICING] Chamando createCheckoutSession...`);
         result = await createCheckoutSession(plan.stripePriceId, selectedGoal);
       }
+      
+      console.log(`[PRICING] Resultado do checkout:`, result);
       
       if (result?.error === "AUTH_REQUIRED") {
         window.location.href = result.url || "/sign-in";
@@ -58,9 +67,11 @@ export function PricingSection() {
       } else if (result?.error) {
         alert(`Erro ao iniciar pagamento: ${result.error}${result.message ? ': ' + result.message : ''}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro no checkout:", e);
-      alert("Ocorreu um erro ao tentar processar o pagamento.");
+      alert(`Ocorreu um erro ao tentar processar o pagamento: ${e.message || "Erro desconhecido"}`);
+    } finally {
+      setLoadingPlan(null);
     }
   };
 
@@ -147,11 +158,19 @@ export function PricingSection() {
 
               <button 
                 onClick={() => handleSubscribe(plan)}
-                className={`btn-premium w-full ${
+                disabled={loadingPlan !== null}
+                className={`btn-premium w-full flex items-center justify-center gap-2 ${
                   plan.id === "completo" ? "btn-primary" : "btn-outline"
-                }`}
+                } ${loadingPlan === plan.id ? "opacity-75 cursor-wait" : ""}`}
               >
-                Assinar Plano {plan.name.split(' ')[0]}
+                {loadingPlan === plan.id ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  `Assinar Plano ${plan.name.split(' ')[0]}`
+                )}
               </button>
             </motion.div>
           ))}
