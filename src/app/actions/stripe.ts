@@ -61,7 +61,7 @@ export async function createOneOffCheckoutSession(goal: string, priceId?: string
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/#pricing`,
       customer_email: user.emailAddresses[0].emailAddress,
       metadata: { clerkId: userId, goal, type: "one_time_workout", priceId: PRICE_ID },
-      payment_method_types: ["card", "pix"],
+      payment_method_types: ["card"],
     });
 
     return { url: session.url };
