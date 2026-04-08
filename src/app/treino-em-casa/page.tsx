@@ -95,12 +95,19 @@ export default async function TreinoEmCasaPage() {
                             : video.youtubeId;
 
                           return (
-                            <iframe
-                              src={`https://www.youtube.com/embed/${ytId}`}
-                              className="w-full h-full border-0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
+                            <div className="relative w-full h-full group/video">
+                              <iframe
+                                src={`https://www.youtube.com/embed/${ytId}?modestbranding=1&rel=0&iv_load_policy=3&controls=1&disablekb=1`}
+                                className="w-full h-full border-0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                              {/* Protetor de Link: Impede clicar no título e no logo do YouTube */}
+                              <div className="absolute inset-0 pointer-events-none">
+                                <div className="absolute top-0 left-0 w-full h-20 pointer-events-auto cursor-default" title="Vídeo Protegido" />
+                                <div className="absolute bottom-0 right-0 w-32 h-16 pointer-events-auto cursor-default" title="Vídeo Protegido" />
+                              </div>
+                            </div>
                           );
                         }
 

@@ -1,4 +1,5 @@
 import { SignUp } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function SignUpPage() {
   return (
@@ -11,7 +12,20 @@ export default function SignUpPage() {
           <h1 className="text-3xl font-black italic tracking-tighter mb-2">
             FIT<span className="text-primary italic">CONNECT</span>
           </h1>
-          <p className="text-white/40 text-sm italic uppercase tracking-widest">Treine em qualquer lugar</p>
+          <p className="text-white/40 text-[10px] italic uppercase tracking-[0.2em] mb-8">Treine em qualquer lugar</p>
+          
+          <div className="glass border-white/5 p-4 rounded-2xl mb-8 flex items-center justify-between gap-4 group/login transition-all hover:border-primary/30">
+            <div className="text-left">
+              <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Já possui uma conta?</p>
+              <p className="text-white text-sm font-bold">Faça seu login agora</p>
+            </div>
+            <Link 
+              href="/sign-in" 
+              className="px-6 py-2.5 bg-primary text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,108,0,0.2)] hover:shadow-[0_0_30px_rgba(255,108,0,0.4)]"
+            >
+              Entrar
+            </Link>
+          </div>
         </div>
 
         <SignUp 

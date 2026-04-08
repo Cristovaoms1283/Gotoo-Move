@@ -1,0 +1,17 @@
+{
+  "name": "Gotoo Move",
+  "short_name": "Gotoo Move",
+  "description": "Treinamentos de musculação e corrida com suporte em vídeo.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#ff6c00",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

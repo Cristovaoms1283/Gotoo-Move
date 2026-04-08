@@ -15,9 +15,22 @@ const geistMono = Geist_Mono({
 
 import { Navbar } from "@/components/Navbar";
 
+export const viewport = {
+  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Gotoo Move | Studio Fitness",
   description: "Treinamentos de musculação, corrida e funcional com suporte em vídeo profissional.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 import { Toaster } from "sonner";

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import { Show, UserButton } from "@clerk/nextjs";
+import { InstallPWA } from "./InstallPWA";
 
 export function Navbar() {
   return (
@@ -26,6 +27,7 @@ export function Navbar() {
           <Link href="/#about" className="hover:text-primary transition-colors">Sobre</Link>
         </div>
         <div className="flex items-center gap-4">
+          <InstallPWA />
           <Show when="signed-out">
             <Link href="/sign-in" className="text-sm font-medium hover:text-primary transition-colors">Login Aluno</Link>
             <Link href="/#pricing" className="btn-premium btn-primary !py-2 !px-6 !text-sm">

@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import Link from "next/link";
 
 export default function SignInPage() {
   return (
@@ -12,7 +13,20 @@ export default function SignInPage() {
           <h1 className="text-3xl font-black italic tracking-tighter mb-2 text-white">
             FIT<span className="text-primary italic">CONNECT</span>
           </h1>
-          <p className="text-zinc-400 text-sm italic uppercase tracking-widest">Treine em qualquer lugar</p>
+          <p className="text-zinc-400 text-[10px] italic uppercase tracking-[0.2em] mb-8">Treine em qualquer lugar</p>
+
+          <div className="glass border-white/5 p-4 rounded-2xl mb-8 flex items-center justify-between gap-4 group/login transition-all hover:border-primary/30 w-full">
+            <div className="text-left">
+              <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Novo por aqui?</p>
+              <p className="text-white text-sm font-bold">Crie sua conta grátis</p>
+            </div>
+            <Link 
+              href="/sign-up" 
+              className="px-6 py-2.5 bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white hover:text-black transition-all border border-white/10"
+            >
+              Cadastrar
+            </Link>
+          </div>
         </div>
 
         <SignIn 
