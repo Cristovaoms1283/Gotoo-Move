@@ -195,31 +195,45 @@ export async function POST(req: Request) {
         // Avanço na periodização (ciclo de renovação a cada 30 dias)
         if (invoice.billing_reason === "subscription_cycle") {
           currentMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
+          console.log(`[STRIPE_WEBHOOK] Avançando mês de treinamento para o usuário ${user.id} (${user.email}) para o mês ${currentMonth}`);
+
+          // Objetivo base (do programa atual ou do perfil do usuário como fallback)
+          const baseGoal = user.activeProgram?.goal || user.goal;
 
           // Atualiza Programa de Musculação
-          if (user.activeProgram && user.activeProgram.category === "GYM") {
+          if (baseGoal) {
              const nextGym = await prisma.trainingProgram.findFirst({
                where: {
                  category: "GYM",
-                 goal: user.activeProgram.goal,
+                 goal: { equals: baseGoal, mode: 'insensitive' },
                  month: currentMonth
                }
              });
-             if (nextGym) activeProgramId = nextGym.id;
+             if (nextGym) {
+               activeProgramId = nextGym.id;
+               console.log(`[STRIPE_WEBHOOK] Novo programa de musculação definido: ${nextGym.title}`);
+             } else {
+               console.warn(`[STRIPE_WEBHOOK] Nenhum programa de musculação encontrado para Mês ${currentMonth} e Objetivo "${baseGoal}"`);
+             }
           }
 
           // Atualiza Programa de Corrida
           if (user.runningProgramId) {
              const currentRunning = await prisma.trainingProgram.findUnique({ where: { id: user.runningProgramId } });
-             if (currentRunning) {
+             if (currentRunning && currentRunning.subcategory) {
                const nextRunning = await prisma.trainingProgram.findFirst({
                  where: {
                    category: "RUNNING",
-                   subcategory: currentRunning.subcategory,
+                   subcategory: { equals: currentRunning.subcategory, mode: 'insensitive' },
                    month: currentMonth
                  }
                });
-               if (nextRunning) runningProgramId = nextRunning.id;
+               if (nextRunning) {
+                 runningProgramId = nextRunning.id;
+                 console.log(`[STRIPE_WEBHOOK] Nova planilha de corrida definida: ${nextRunning.title}`);
+               } else {
+                 console.warn(`[STRIPE_WEBHOOK] Nenhuma planilha de corrida encontrada para Mês ${currentMonth} e Subcategoria "${currentRunning.subcategory}"`);
+               }
              }
           }
         }

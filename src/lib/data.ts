@@ -110,18 +110,23 @@ export async function getUserSubscriptionStatus(clerkId: string) {
     // FUNCIONAL: HIIT ✅ | Musculação/Corrida 🔒
 
     const normalizedPlan = planName.toLowerCase();
+    const isAdmin = user?.role === 'admin';
     
     access = {
-      canGym: normalizedPlan.includes("musculação") || 
+      canGym: isAdmin || 
+              normalizedPlan.includes("musculação") || 
               normalizedPlan.includes("runner") || 
               normalizedPlan.includes("completo") || 
               normalizedPlan.includes("performance") || 
-              normalizedPlan.includes("avulso"),
-      canHIIT: normalizedPlan.includes("funcional") || 
+              normalizedPlan.includes("avulso") ||
+              ["mensal", "trimestral", "semestral", "anual"].includes(normalizedPlan),
+      canHIIT: isAdmin || 
+               normalizedPlan.includes("funcional") || 
                normalizedPlan.includes("completo") || 
                normalizedPlan.includes("performance") || 
                normalizedPlan.includes("avulso"),
-      canRunning: normalizedPlan.includes("runner") || 
+      canRunning: isAdmin || 
+                  normalizedPlan.includes("runner") || 
                   normalizedPlan.includes("performance") || 
                   normalizedPlan.includes("avulso")
     };

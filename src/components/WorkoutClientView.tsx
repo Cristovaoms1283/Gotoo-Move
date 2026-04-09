@@ -56,6 +56,40 @@ export default function WorkoutClientView({
     setCurrentLoad("");
   }, [activeExerciseIndex]);
 
+  // Função para tocar o alarme sonoro
+  const playTimerEndSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      const audioCtx = new AudioContextClass();
+      
+      // Beep duplo rápido
+      const playBeep = (startTime: number, frequency: number) => {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.3);
+      };
+
+      playBeep(audioCtx.currentTime, 880); // Lá 5
+      playBeep(audioCtx.currentTime + 0.4, 880); // Segundo beep
+    } catch (e) {
+      console.warn("Navegador bloqueou áudio ou erro na Web Audio API:", e);
+    }
+  };
+
   // Cronômetro de descanso
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -63,7 +97,14 @@ export default function WorkoutClientView({
       interval = setInterval(() => {
         setActiveTimer(prev => {
           if (!prev) return null;
-          if (prev.timeLeft <= 1) return null;
+          if (prev.timeLeft <= 1) {
+            playTimerEndSound();
+            toast.success("Descanso finalizado! Próxima série.", {
+              icon: "🔔",
+              duration: 5000
+            });
+            return null;
+          }
           return { ...prev, timeLeft: prev.timeLeft - 1 };
         });
       }, 1000);
