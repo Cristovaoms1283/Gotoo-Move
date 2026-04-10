@@ -10,7 +10,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
   max: 5, // Limita o número de conexões simultâneas
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
 });
 
 const adapter = new PrismaPg(pool);
