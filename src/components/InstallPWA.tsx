@@ -74,10 +74,10 @@ export function InstallPWA() {
   return (
     <button
       onClick={handleInstallClick}
-      className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 text-white text-[9px] sm:text-[10px] uppercase font-bold tracking-widest rounded-full transition-all border border-white/10 group active:scale-95 whitespace-nowrap"
+      className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 bg-white/5 hover:bg-white/10 text-white text-[9px] sm:text-[10px] uppercase font-bold tracking-widest rounded-full transition-all border border-white/10 group active:scale-95 whitespace-nowrap"
       title="Instalar App no seu dispositivo"
     >
-      <Download className="h-3 w-3 sm:h-3 sm:w-3 text-primary group-hover:scale-110 transition-transform hidden sm:block" />
+      <Download className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary group-hover:scale-110 transition-transform hidden sm:block" />
       <span>Instalar App</span>
     </button>
   );

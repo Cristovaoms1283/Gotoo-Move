@@ -138,7 +138,7 @@ export default async function DashboardHubPage() {
       <div className="container mx-auto px-6">
         <header className="flex items-center justify-between mb-16">
           <div>
-            <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 uppercase">
+            <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter mb-2 uppercase">
               BEM-VINDO, <span className="text-primary italic">{clerkUser?.firstName}</span>!
             </h1>
             <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ export default async function DashboardHubPage() {
               href={option.isLocked ? "#" : option.href}
               className={`group relative ${option.isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
             >
-                <div className={`relative glass p-8 rounded-[40px] border border-white/5 bg-white/[0.02] ${!option.isLocked ? 'hover:bg-white/[0.05]' : 'pointer-events-none'} transition-all duration-500 flex flex-col items-start gap-4 overflow-hidden h-full`}>
+                <div className={`relative glass p-6 sm:p-8 rounded-[40px] border border-white/5 bg-white/[0.02] ${!option.isLocked ? 'hover:bg-white/[0.05]' : 'pointer-events-none'} transition-all duration-500 flex flex-col items-start gap-4 overflow-hidden h-full`}>
                     {!option.isLocked && (
                       <div className="absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                     )}
