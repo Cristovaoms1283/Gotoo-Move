@@ -69,7 +69,7 @@ function generateRunningExercises(distance: string, month: number) {
 
   // Semana 4 (Polimento)
   addEx("Semana 4 - Segunda", `Trote Regenerativo de ${currentBaseVolume - 5} min`, "1", `${currentBaseVolume - 5} min`, "Livre");
-  addEx("Semana 4 - Quarta", `4x [${intervalDistance} no ritmo de prova / 1:30 min descanso]`, "4", intervalDistance, "1.5 min");
+  addEx("Semana 4 - Quarta", `4x [${intervalDistance} no ritmo de prova / 1 min descanso]`, "4", intervalDistance, "1 min");
   
   if (month % 3 === 0) {
     // Prova teste a cada 3 meses

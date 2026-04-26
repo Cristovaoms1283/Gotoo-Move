@@ -14,6 +14,7 @@ import { getUserSubscriptionStatus, getActiveProgram } from "@/lib/data";
 import Link from "next/link";
 import BuyOneOffButton from "@/components/BuyOneOffButton";
 import { syncUser } from "@/app/actions/user";
+import { rotateUserProgram } from "@/app/actions/programs";
 import { redirect } from "next/navigation";
 
 const HUB_OPTIONS = [
@@ -83,14 +84,22 @@ export default async function DashboardHubPage() {
   if (!clerkUser) redirect("/sign-in");
 
   const dbUser = await syncUser();
+  if (!dbUser) redirect("/sign-in");
 
-  // Pequeno delay para garantir sincronização em dev
-  if (process.env.NODE_ENV !== 'production') {
-    await new Promise(r => setTimeout(r, 500));
+  // Redireciona se perfil estiver incompleto
+  if (!dbUser.goal || !dbUser.whatsapp) {
+    redirect("/dashboard/onboarding");
   }
-  
-  if (!dbUser?.whatsapp || !dbUser?.goal) {
-    console.warn("Perfil incompleto ou não sincronizado.", clerkUser.id);
+
+  // Lógica de Periodização Automática para Convidados (Baseada em tempo)
+  if (dbUser.isGuest) {
+    const daysSinceCreation = Math.floor((Date.now() - new Date(dbUser.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    const expectedMonth = Math.min(12, Math.floor(daysSinceCreation / 30) + 1);
+
+    if (dbUser.current_training_month < expectedMonth) {
+      console.log(`[GUEST_ROTATION] Rotacionando convidado ${dbUser.email} para o mês ${expectedMonth}`);
+      await rotateUserProgram(dbUser.id, expectedMonth);
+    }
   }
 
   const { id: dbUserId, status, goal, isGuest, access } = await getUserSubscriptionStatus(clerkUser.id);

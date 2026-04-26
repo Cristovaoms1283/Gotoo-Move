@@ -118,39 +118,59 @@ export default async function WorkoutsPage({
           </div>
         )}
 
-        {/* Seleção de Fichas estilo App (Pills) */}
-        <div className="flex gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-          {currentWorkouts.map((pw: any) => (
-            <Link 
-              key={pw.id}
-              href={`/dashboard/workouts?type=${type}&sheet=${pw.id}`}
-              className={`whitespace-nowrap px-6 py-3 rounded-full font-black italic uppercase text-xs transition-all duration-500 border-2 ${
-                selectedWorkout?.id === pw.id 
-                  ? 'bg-primary text-black border-primary shadow-[0_0_25px_rgba(var(--primary-rgb),0.4)]' 
-                  : 'bg-zinc-900 text-white/40 border-zinc-800 hover:border-zinc-700'
-              }`}
-            >
-              {pw.label}
-            </Link>
-          ))}
+        {/* Seleção de Fichas estilo Ficheiro (AnyFit Style) */}
+        <div className="relative flex items-end gap-1 mb-0 px-2 overflow-x-auto scrollbar-hide border-b-2 border-zinc-900/50">
+          {currentWorkouts.map((pw: any) => {
+            const isActive = selectedWorkout?.id === pw.id;
+            return (
+              <Link 
+                key={pw.id}
+                href={`/dashboard/workouts?type=${type}&sheet=${pw.id}`}
+                className={`relative flex items-center justify-center min-w-[80px] h-12 px-6 rounded-t-2xl font-black italic uppercase text-sm transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-zinc-900 text-primary z-10 scale-y-105' 
+                    : 'bg-zinc-900/30 text-white/30 hover:bg-zinc-900/50 hover:text-white/50 -mb-1'
+                }`}
+              >
+                {/* Indicador de Aba Ativa */}
+                {isActive && (
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-primary rounded-t-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+                )}
+                <span className="relative z-10">{pw.label}</span>
+                
+                {/* Cantos Arredondados estilo Ficheiro (Opcional se usar background sólido) */}
+                {isActive && (
+                  <>
+                    <div className="absolute -left-4 bottom-0 w-4 h-4 bg-zinc-900 [clip-path:polygon(100%_0,100%_100%,0_100%)]" />
+                    <div className="absolute -right-4 bottom-0 w-4 h-4 bg-zinc-900 [clip-path:polygon(0_0,0_100%,100%_100%)]" />
+                  </>
+                )}
+              </Link>
+            );
+          })}
         </div>
 
-        {selectedWorkout ? (
-          <WorkoutClientView 
-            workout={selectedWorkout.workout} 
-            selectedLabel={selectedWorkout.label} 
-            userId={dbUserId || ""}
-            isDeloadActive={!!isDeloadActive}
-            lastLoads={lastLoads}
-          />
-        ) : (
-          <div className="text-center py-20 bg-zinc-900/50 rounded-[40px] border border-dashed border-white/5">
-            <Lock className="h-12 w-12 text-white/10 mx-auto mb-4" />
-            <div className="text-white/20 uppercase font-black tracking-widest text-sm">
-              Selecione sua ficha para treinar
-            </div>
+        {/* Container da Ficha (Corpo do Ficheiro) */}
+        <div className="bg-zinc-900/40 rounded-b-[40px] rounded-tr-[40px] p-1 sm:p-4 border-t-0 border border-white/5 shadow-2xl mb-10">
+          <div className="p-4 sm:p-8">
+            {selectedWorkout ? (
+              <WorkoutClientView 
+                workout={selectedWorkout.workout} 
+                selectedLabel={selectedWorkout.label} 
+                userId={dbUserId || ""}
+                isDeloadActive={!!isDeloadActive}
+                lastLoads={lastLoads}
+              />
+            ) : (
+              <div className="text-center py-20 bg-zinc-900/50 rounded-[40px] border border-dashed border-white/5">
+                <Lock className="h-12 w-12 text-white/10 mx-auto mb-4" />
+                <div className="text-white/20 uppercase font-black tracking-widest text-sm">
+                  Selecione sua ficha para treinar
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </main>
   );

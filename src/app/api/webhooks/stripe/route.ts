@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { resend } from "@/lib/resend";
 import { SubscriptionFailedEmail } from "@/components/emails/SubscriptionFailed";
+import { rotateUserProgram } from "@/app/actions/programs";
 
 export const dynamic = "force-dynamic";
 
@@ -194,59 +195,16 @@ export async function POST(req: Request) {
 
         // Avanço na periodização (ciclo de renovação a cada 30 dias)
         if (invoice.billing_reason === "subscription_cycle") {
-          currentMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
-          console.log(`[STRIPE_WEBHOOK] Avançando mês de treinamento para o usuário ${user.id} (${user.email}) para o mês ${currentMonth}`);
-
-          // Objetivo base (do programa atual ou do perfil do usuário como fallback)
-          const baseGoal = user.activeProgram?.goal || user.goal;
-
-          // Atualiza Programa de Musculação
-          if (baseGoal) {
-             const nextGym = await prisma.trainingProgram.findFirst({
-               where: {
-                 category: "GYM",
-                 goal: { equals: baseGoal, mode: 'insensitive' },
-                 month: currentMonth
-               }
-             });
-             if (nextGym) {
-               activeProgramId = nextGym.id;
-               console.log(`[STRIPE_WEBHOOK] Novo programa de musculação definido: ${nextGym.title}`);
-             } else {
-               console.warn(`[STRIPE_WEBHOOK] Nenhum programa de musculação encontrado para Mês ${currentMonth} e Objetivo "${baseGoal}"`);
-             }
-          }
-
-          // Atualiza Programa de Corrida
-          if (user.runningProgramId) {
-             const currentRunning = await prisma.trainingProgram.findUnique({ where: { id: user.runningProgramId } });
-             if (currentRunning && currentRunning.subcategory) {
-               const nextRunning = await prisma.trainingProgram.findFirst({
-                 where: {
-                   category: "RUNNING",
-                   subcategory: { equals: currentRunning.subcategory, mode: 'insensitive' },
-                   month: currentMonth
-                 }
-               });
-               if (nextRunning) {
-                 runningProgramId = nextRunning.id;
-                 console.log(`[STRIPE_WEBHOOK] Nova planilha de corrida definida: ${nextRunning.title}`);
-               } else {
-                 console.warn(`[STRIPE_WEBHOOK] Nenhuma planilha de corrida encontrada para Mês ${currentMonth} e Subcategoria "${currentRunning.subcategory}"`);
-               }
-             }
-          }
+          const nextMonth = currentMonth >= 12 ? 1 : currentMonth + 1;
+          console.log(`[STRIPE_WEBHOOK] Avançando mês de treinamento para o usuário ${user.id} (${user.email}) para o mês ${nextMonth}`);
+          await rotateUserProgram(user.id, nextMonth);
+        } else {
+          // Apenas garante que o status esteja ativo se não for renovação de ciclo (ex: primeiro pagamento)
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { status: "active" },
+          });
         }
-
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { 
-            status: "active",
-            activeProgramId,
-            runningProgramId,
-            current_training_month: currentMonth
-          },
-        });
       }
     }
   }

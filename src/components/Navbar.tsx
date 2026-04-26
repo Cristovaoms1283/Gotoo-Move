@@ -60,7 +60,7 @@ export function Navbar() {
           <InstallPWA />
           
           <Show when="signed-out">
-            <Link href="/sign-in" className="hidden sm:inline-block text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/sign-in" className="text-sm font-medium hover:text-primary transition-colors">
               Login Aluno
             </Link>
             <Link href="/#pricing" className="btn-premium btn-primary !py-1.5 !px-3 !text-[10px] sm:!py-2 sm:!px-6 sm:!text-sm">
@@ -69,7 +69,7 @@ export function Navbar() {
           </Show>
 
           <Show when="signed-in">
-            <Link href="/dashboard" className="hidden sm:inline-block text-sm font-medium hover:text-primary transition-colors">
+            <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
               Meu Painel
             </Link>
             <UserButton>

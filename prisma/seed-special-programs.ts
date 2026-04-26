@@ -67,18 +67,18 @@ async function main() {
   // Bi-set means pairs of exercises done without rest between them.
   const biset_A = [
     { name: 'Agachamento com Salto (Bi-set)', sets: '4', reps: '15', rest: '0s', description: 'Sem descanso, ir para a Cadeira Extensora' },
-    { name: 'Cadeira Extensora (Bi-set)', sets: '4', reps: '15', rest: '90s' },
+    { name: 'Cadeira Extensora (Bi-set)', sets: '4', reps: '15', rest: '60s' },
     { name: 'Supino Reto Halteres (Bi-set)', sets: '4', reps: '15', rest: '0s', description: 'Sem descanso, ir para Flexão' },
-    { name: 'Flexão de Braço (Bi-set)', sets: '4', reps: 'Máx', rest: '90s' },
+    { name: 'Flexão de Braço (Bi-set)', sets: '4', reps: 'Máx', rest: '60s' },
     { name: 'Polichinelo', sets: '3', reps: '1 min', rest: '45s' },
     { name: 'Abdominal Remador', sets: '4', reps: '20', rest: '45s' }
   ];
 
   const biset_B = [
     { name: 'Stiff (Bi-set)', sets: '4', reps: '15', rest: '0s', description: 'Sem descanso, ir para Mesa Flexora' },
-    { name: 'Mesa Flexora (Bi-set)', sets: '4', reps: '15', rest: '90s' },
+    { name: 'Mesa Flexora (Bi-set)', sets: '4', reps: '15', rest: '60s' },
     { name: 'Puxada Frontal (Bi-set)', sets: '4', reps: '15', rest: '0s', description: 'Sem descanso, ir para Remada Curvada' },
-    { name: 'Remada Curvada Halteres (Bi-set)', sets: '4', reps: '15', rest: '90s' },
+    { name: 'Remada Curvada Halteres (Bi-set)', sets: '4', reps: '15', rest: '60s' },
     { name: 'Burpee', sets: '3', reps: '15', rest: '60s' },
     { name: 'Prancha Isométrica', sets: '4', reps: '45s', rest: '45s' }
   ];
@@ -107,19 +107,19 @@ async function main() {
   console.log('Criando Programa Hipertensos...');
   const hiper_A = [
     { name: 'Esteira / Caminhada Leve', sets: '1', reps: '10 min', rest: '-' },
-    { name: 'Agachamento no Banco', sets: '3', reps: '12', rest: '90s', description: 'Evitar apneia (prender a respiração).' },
-    { name: 'Cadeira Extensora', sets: '3', reps: '15', rest: '90s' },
-    { name: 'Supino Máquina', sets: '3', reps: '12', rest: '90s', description: 'Controlar respiração, cargas moderadas.' },
-    { name: 'Remada Máquina', sets: '3', reps: '12', rest: '90s' },
+    { name: 'Agachamento no Banco', sets: '3', reps: '12', rest: '60s', description: 'Evitar apneia (prender a respiração).' },
+    { name: 'Cadeira Extensora', sets: '3', reps: '15', rest: '60s' },
+    { name: 'Supino Máquina', sets: '3', reps: '12', rest: '60s', description: 'Controlar respiração, cargas moderadas.' },
+    { name: 'Remada Máquina', sets: '3', reps: '12', rest: '60s' },
     { name: 'Bicicleta Ergométrica', sets: '1', reps: '15 min', rest: '-' }
   ];
 
   const hiper_B = [
     { name: 'Bicicleta Ergométrica', sets: '1', reps: '10 min', rest: '-' },
-    { name: 'Leg Press Horizontal (Baixa Carga)', sets: '3', reps: '15', rest: '90s' },
-    { name: 'Mesa Flexora', sets: '3', reps: '12', rest: '90s' },
-    { name: 'Desenvolvimento Máquina', sets: '3', reps: '12', rest: '90s', description: 'Cuidado com braços acima da cabeça, carga muito leve.' },
-    { name: 'Puxada Frontal Triângulo', sets: '3', reps: '15', rest: '90s' },
+    { name: 'Leg Press Horizontal (Baixa Carga)', sets: '3', reps: '15', rest: '60s' },
+    { name: 'Mesa Flexora', sets: '3', reps: '12', rest: '60s' },
+    { name: 'Desenvolvimento Máquina', sets: '3', reps: '12', rest: '60s', description: 'Cuidado com braços acima da cabeça, carga muito leve.' },
+    { name: 'Puxada Frontal Triângulo', sets: '3', reps: '15', rest: '60s' },
     { name: 'Caminhada Estação Plana', sets: '1', reps: '15 min', rest: '-' }
   ];
 

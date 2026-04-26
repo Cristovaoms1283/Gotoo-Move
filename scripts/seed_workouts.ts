@@ -137,7 +137,7 @@ async function createAnnualPrograms() {
         phaseName = "Adaptação e Base";
         splitType = "ABC";
         repScheme = "3 x 12 a 15";
-        restTime = "90s";
+        restTime = "60s";
       } else if (month <= 5) {
         phaseName = "Hipertrofia Funcional";
         splitType = "ABCD";
@@ -147,7 +147,7 @@ async function createAnnualPrograms() {
         phaseName = "Força e Tensão";
         splitType = "ABCDE";
         repScheme = "4 x 6 a 10";
-        restTime = "90s";
+        restTime = "60s";
       } else {
         phaseName = "Metabólico / Intensificação";
         splitType = "ABCDE";
@@ -162,7 +162,7 @@ async function createAnnualPrograms() {
         if (month <= 6) splitType = "ABCD";
       } else if (goal.includes("hipertenso")) {
         repScheme = "3 x 15"; // Evitar carga muito pesada
-        restTime = "90s";     // Mais descanso, sem Pico de PA
+        restTime = "60s";     // Mais descanso, sem Pico de PA
         splitType = month % 2 === 0 ? "ABCD" : "ABC"; 
       } else if (goal.includes("diabetes")) {
         repScheme = "3 x 12 a 15";
