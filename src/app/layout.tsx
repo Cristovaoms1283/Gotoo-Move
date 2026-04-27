@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "@uploadthing/react/styles.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ptBR } from "@clerk/localizations";
+import { dark } from "@clerk/themes";
+import Script from "next/script";
+import { Toaster } from "sonner";
+import { Navbar } from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,16 +18,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-import { Navbar } from "@/components/Navbar";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
-
-export const viewport = {
-  themeColor: "#000000",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-};
-
 export const metadata: Metadata = {
   title: "Gotoo Move | Studio Fitness",
   description: "Treinamentos de musculação, corrida e funcional com suporte em vídeo profissional.",
@@ -32,11 +27,10 @@ export const metadata: Metadata = {
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
+  other: {
+    "facebook-domain-verification": "vum68cax8rz3u0hdc9hev37cso7leg",
+  },
 };
-
-import { Toaster } from "sonner";
-import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 
 export default function RootLayout({
   children,
@@ -44,28 +38,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider appearance={{ baseTheme: dark }} afterSignOutUrl="/">
+    <ClerkProvider localization={ptBR} appearance={{ baseTheme: dark }} afterSignOutUrl="/">
       <html lang="pt-BR">
-        <body className="antialiased">
-          <Toaster position="top-center" richColors theme="dark" />
+        <head>
+          <Script id="meta-pixel" strategy="afterInteractive">
+            {`
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '945276428426892');
+              fbq('track', 'PageView');
+            `}
+          </Script>
+          <noscript>
+            <img 
+              height="1" 
+              width="1" 
+              style={{ display: 'none' }}
+              src="https://www.facebook.com/tr?id=945276428426892&ev=PageView&noscript=1"
+            />
+          </noscript>
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
           <Navbar />
           {children}
-          <MobileBottomNav />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    }, function(err) {
-                      console.log('ServiceWorker registration failed: ', err);
-                    });
-                  });
-                }
-              `,
-            }}
-          />
+          <Toaster richColors position="top-center" />
         </body>
       </html>
     </ClerkProvider>
