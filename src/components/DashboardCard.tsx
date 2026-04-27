@@ -3,19 +3,41 @@
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, LucideIcon } from "lucide-react";
+import { 
+  ArrowRight, 
+  Lock, 
+  Dumbbell, 
+  Lightbulb, 
+  Apple, 
+  UtensilsCrossed, 
+  Flame, 
+  Trophy, 
+  Footprints 
+} from "lucide-react";
+
+const IconMap: Record<string, any> = {
+  Dumbbell,
+  Lightbulb,
+  Apple,
+  UtensilsCrossed,
+  Flame,
+  Trophy,
+  Footprints
+};
 
 interface DashboardCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  iconName: string;
   href: string;
   isLocked?: boolean;
 }
 
-export function DashboardCard({ title, description, icon: Icon, href, isLocked }: DashboardCardProps) {
+export function DashboardCard({ title, description, iconName, href, isLocked }: DashboardCardProps) {
   let mouseX = useMotionValue(0);
   let mouseY = useMotionValue(0);
+
+  const Icon = IconMap[iconName] || Dumbbell;
 
   function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent) {
     let { left, top } = currentTarget.getBoundingClientRect();

@@ -1,16 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
-import { 
-  Dumbbell, 
-  Lightbulb, 
-  Apple, 
-  UtensilsCrossed, 
-  ArrowRight,
-  Lock,
-  Flame,
-  Trophy,
-  Footprints
-} from "lucide-react";
 import { getUserSubscriptionStatus, getActiveProgram } from "@/lib/data";
 import Link from "next/link";
 import BuyOneOffButton from "@/components/BuyOneOffButton";
@@ -24,7 +13,7 @@ const HUB_OPTIONS = [
   {
     title: "Meu Treino",
     description: "Acesse seu programa personalizado e fichas de musculação.",
-    icon: Dumbbell,
+    iconName: "Dumbbell",
     href: "/dashboard/workouts?type=gym",
     color: "from-primary to-primary-foreground",
     delay: 0.1
@@ -32,7 +21,7 @@ const HUB_OPTIONS = [
   {
     title: "Treino HIIT",
     description: "Aulas rápidas em casa, sem equipamento.",
-    icon: Flame,
+    iconName: "Flame",
     href: "/treino-em-casa",
     color: "from-orange-500 to-red-500",
     delay: 0.2
@@ -40,7 +29,7 @@ const HUB_OPTIONS = [
   {
     title: "Corrida",
     description: "Planilhas e periodização para sua evolução no asfalto.",
-    icon: Footprints,
+    iconName: "Footprints",
     href: "/dashboard/workouts?type=running",
     color: "from-green-500 to-emerald-500",
     delay: 0.3
@@ -48,7 +37,7 @@ const HUB_OPTIONS = [
   {
     title: "Dicas de Treino",
     description: "Técnicas, respiração e como evitar lesões.",
-    icon: Lightbulb,
+    iconName: "Lightbulb",
     href: "/dashboard/tips",
     color: "from-yellow-500 to-orange-500",
     delay: 0.4
@@ -56,7 +45,7 @@ const HUB_OPTIONS = [
   {
     title: "Alimentação",
     description: "Dicas nutricionais para potencializar seu resultado.",
-    icon: Apple,
+    iconName: "Apple",
     href: "/dashboard/nutrition",
     color: "from-green-400 to-emerald-400",
     delay: 0.5
@@ -64,7 +53,7 @@ const HUB_OPTIONS = [
   {
     title: "Receitas Fitness",
     description: "Pratos saudáveis e saborosos para sua dieta.",
-    icon: UtensilsCrossed,
+    iconName: "UtensilsCrossed",
     href: "/dashboard/recipes",
     color: "from-red-500 to-pink-500",
     delay: 0.6
@@ -72,7 +61,7 @@ const HUB_OPTIONS = [
   {
     title: "Recompensas",
     description: "Troque suas FitCoins por brindes e benefícios exclusivos.",
-    icon: Trophy,
+    iconName: "Trophy",
     href: "/dashboard/rewards",
     color: "from-primary to-orange-500",
     delay: 0.7
@@ -178,7 +167,7 @@ export default async function DashboardHubPage() {
                 key={option.title}
                 title={option.title}
                 description={option.description}
-                icon={option.icon}
+                iconName={option.iconName}
                 href={option.href}
                 isLocked={option.isLocked}
               />
