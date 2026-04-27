@@ -14,6 +14,7 @@ export function AdminSidebar() {
     { href: "/admin/users", label: "Gerenciar Alunos" },
     { href: "/admin/guests", label: "Gestão de Convidados", className: "text-blue-400 font-bold" },
     { href: "/admin/leads", label: "Gestão de Leads (Novo)", className: "text-green-400 font-bold" },
+    { href: "/admin/traffic", label: "Central de Tráfego", className: "text-cyan-400 font-bold" },
     { href: "/admin/workouts", label: "Fichas de Treino" },
     { href: "/admin/programs", label: "Programas (30 dias)", className: "text-orange-400 font-bold" },
     { href: "/admin/home-workouts", label: "Treinos em Casa", className: "text-blue-400 font-bold" },

@@ -50,6 +50,13 @@ model Lead {
   isConfirmed Boolean  @default(false)
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+  
+  // Novos campos para rastreamento de tráfego
+  status      String   @default("Novo")
+  source      String?  // Ex: facebook, google, tiktok, instagram
+  campaign    String?  // Nome da campanha de tráfego
+  city        String?
+  goal        String?  // Objetivo do aluno (Emagrecimento, Massa, etc)
 
   @@schema("fitconnect")
 }

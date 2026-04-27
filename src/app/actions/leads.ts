@@ -23,6 +23,11 @@ export async function registerLead(formData: FormData) {
       return { success: false, error: "Este e-mail já confirmou a aula experimental anteriormente." };
     }
 
+    const source = formData.get("source") as string || "orgânico";
+    const campaign = formData.get("campaign") as string || "direto";
+    const city = formData.get("city") as string || "não informado";
+    const goal = formData.get("goal") as string || "não informado";
+
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 horas para evitar erros de fuso horário
 
@@ -35,6 +40,10 @@ export async function registerLead(formData: FormData) {
         token,
         expiresAt,
         isConfirmed: false,
+        source,
+        campaign,
+        city,
+        goal,
       },
       create: {
         name,
@@ -42,6 +51,10 @@ export async function registerLead(formData: FormData) {
         whatsapp,
         token,
         expiresAt,
+        source,
+        campaign,
+        city,
+        goal,
       },
     });
 
