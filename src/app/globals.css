@@ -51,6 +51,21 @@ body {
   .btn-outline {
     @apply border-2 border-primary text-primary hover:bg-primary/10;
   }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 254, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 254, 0.4);
+  }
 }
 
 .hero-glow {
@@ -63,4 +78,13 @@ body {
   background: radial-gradient(circle at center, rgba(112, 0, 255, 0.15) 0%, transparent 70%);
   pointer-events: none;
   z-index: -1;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.bounce {
+  animation: bounce-subtle 2s infinite;
 }
