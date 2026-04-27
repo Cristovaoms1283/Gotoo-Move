@@ -32,9 +32,6 @@ export const metadata: Metadata = {
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
-  other: {
-    "facebook-domain-verification": "vum68cax8rz3u0hdc9hev37cso7leg",
-  },
 };
 
 import { Toaster } from "sonner";
