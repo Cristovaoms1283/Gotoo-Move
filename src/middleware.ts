@@ -3,12 +3,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
-  console.log(`[MIDDLEWARE] Rota: ${req.nextUrl.pathname} | UserID: ${userId || 'Nulo'}`);
-  
-  if (req.nextUrl.pathname === "/api/temp-seed") return;
   if (isProtectedRoute(req)) await auth.protect();
-}, { clockSkewInMs: 1000 * 60 * 5 });
+});
 
 export const config = {
   matcher: [
