@@ -16,6 +16,7 @@ import BuyOneOffButton from "@/components/BuyOneOffButton";
 import { syncUser } from "@/app/actions/user";
 import { rotateUserProgram } from "@/app/actions/programs";
 import { redirect } from "next/navigation";
+import { InstallPWA } from "@/components/InstallPWA";
 
 const HUB_OPTIONS = [
   {
@@ -78,6 +79,8 @@ const HUB_OPTIONS = [
 
 import { getRunningWorkoutSchedule, calculateCurrentWeek } from "@/lib/running-logic";
 import { Footprints } from "lucide-react";
+
+import { DashboardCard } from "@/components/DashboardCard";
 
 export default async function DashboardHubPage() {
   const clerkUser = await currentUser();
@@ -161,45 +164,26 @@ export default async function DashboardHubPage() {
                 )}
             </div>
           </div>
-          <div className="scale-125">
-            <UserButton />
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:block">
+              <InstallPWA forceVisible={true} />
+            </div>
+            <div className="scale-125">
+              <UserButton />
+            </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {dynamicOptions.map((option) => (
-            <Link 
-              key={option.title} 
-              href={option.isLocked ? "#" : option.href}
-              className={`group relative ${option.isLocked ? 'cursor-not-allowed opacity-60' : ''}`}
-            >
-                <div className={`relative glass p-6 sm:p-8 rounded-[40px] border border-white/5 bg-white/[0.02] ${!option.isLocked ? 'hover:bg-white/[0.05]' : 'pointer-events-none'} transition-all duration-500 flex flex-col items-start gap-4 overflow-hidden h-full`}>
-                    {!option.isLocked && (
-                      <div className="absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                    )}
-                    
-                    <div className={`p-4 rounded-2xl bg-white/5 ${option.isLocked ? 'text-white/20' : 'text-primary group-hover:bg-primary group-hover:text-black'} transition-all duration-500`}>
-                        {option.isLocked ? <Lock className="h-8 w-8" /> : <option.icon className="h-8 w-8" />}
-                    </div>
-                    
-                    <div>
-                        <h2 className={`text-2xl font-black italic uppercase tracking-tight mb-2 flex items-center gap-2 ${option.isLocked ? 'text-white/40' : ''}`}>
-                            {option.title}
-                            {!option.isLocked && <ArrowRight className="h-5 w-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary" />}
-                            {option.isLocked && <Lock className="h-4 w-4 ml-auto text-primary/40" />}
-                        </h2>
-                        <p className="text-white/40 leading-relaxed text-sm max-w-[280px]">
-                            {option.isLocked ? "Conteúdo não disponível no seu plano atual." : option.description}
-                        </p>
-                    </div>
-
-                    <div className="mt-auto pt-4">
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${option.isLocked ? 'text-white/20' : 'text-primary/50 group-hover:text-primary'} transition-colors italic`}>
-                            {option.isLocked ? "Fazer Upgrade" : "Acessar Conteúdo"}
-                        </span>
-                    </div>
-                </div>
-            </Link>
+            <DashboardCard
+              key={option.title}
+              title={option.title}
+              description={option.description}
+              icon={option.icon}
+              href={option.href}
+              isLocked={option.isLocked}
+            />
           ))}
         </div>
 

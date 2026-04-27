@@ -83,7 +83,7 @@ export function PricingSection() {
             Escolha seu <span className="text-primary">Programa</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-12">
-            Selecione seu objetivo principal e nossa IA direcionará o melhor treinamento para você.
+            Selecione seu objetivo principal e nossa IA direcionará the melhor treinamento para você.
           </p>
 
           {/* Seletor de Objetivo */}
@@ -113,10 +113,15 @@ export function PricingSection() {
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ 
+                y: -10,
+                scale: plan.id === "combo-performance" || plan.id === "completo" ? 1.08 : 1.03,
+                transition: { duration: 0.2 }
+              }}
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`glass p-8 rounded-3xl flex flex-col relative ${
-                plan.id === "combo-performance" || plan.id === "completo" ? "border-primary/50 ring-2 ring-primary/20 scale-105 z-10" : ""
+              className={`glass p-8 rounded-3xl flex flex-col relative transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)] hover:border-primary/40 ${
+                plan.id === "combo-performance" || plan.id === "completo" ? "border-primary/50 ring-2 ring-primary/20 scale-105 z-10" : "border-white/10"
               }`}
             >
               {(plan.id === "combo-performance" || plan.id === "completo") && (

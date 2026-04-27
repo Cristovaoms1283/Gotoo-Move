@@ -23,7 +23,7 @@ export default function BuyOneOffButton({ goal }: { goal: string }) {
     <button
       onClick={handleBuy}
       disabled={loading}
-      className="btn-premium bg-white text-black hover:bg-primary hover:text-black w-full mt-4 flex items-center justify-center gap-2"
+      className="btn-premium bg-white text-black hover:bg-primary hover:text-black w-full mt-4 flex items-center justify-center gap-2 shimmer"
     >
       {loading ? (
         "Processando..."

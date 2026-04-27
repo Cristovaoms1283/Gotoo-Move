@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 import { Navbar } from "@/components/Navbar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export const viewport = {
   themeColor: "#000000",
@@ -49,6 +50,7 @@ export default function RootLayout({
           <Toaster position="top-center" richColors theme="dark" />
           <Navbar />
           {children}
+          <MobileBottomNav />
           <script
             dangerouslySetInnerHTML={{
               __html: `

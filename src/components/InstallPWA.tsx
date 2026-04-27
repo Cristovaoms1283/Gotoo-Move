@@ -5,7 +5,7 @@ import { Download, X, Share, Smartphone, Info, ChevronRight, Apple } from "lucid
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function InstallPWA() {
+export function InstallPWA({ forceVisible = false }: { forceVisible?: boolean }) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -14,7 +14,7 @@ export function InstallPWA() {
 
   useEffect(() => {
     // Detecta se é iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
+    const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent.toLowerCase() : '';
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIosDevice);
     
@@ -23,7 +23,7 @@ export function InstallPWA() {
     }
 
     // Verifica se já está instalado (standalone)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true);
 
     // Se for iOS e não estiver instalado, mostramos o botão de qualquer forma
     if (isIosDevice && !isStandalone) {
@@ -65,7 +65,7 @@ export function InstallPWA() {
     }
   };
 
-  if (!isVisible) return null;
+  if (!isVisible && !forceVisible) return null;
 
   return (
     <>
