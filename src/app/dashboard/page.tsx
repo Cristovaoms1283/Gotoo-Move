@@ -8,7 +8,8 @@ import {
   ArrowRight,
   Lock,
   Flame,
-  Trophy
+  Trophy,
+  Footprints
 } from "lucide-react";
 import { getUserSubscriptionStatus, getActiveProgram } from "@/lib/data";
 import Link from "next/link";
@@ -77,8 +78,6 @@ const HUB_OPTIONS = [
   }
 ];
 
-import { getRunningWorkoutSchedule, calculateCurrentWeek } from "@/lib/running-logic";
-import { Footprints } from "lucide-react";
 
 import { DashboardCard } from "@/components/DashboardCard";
 
