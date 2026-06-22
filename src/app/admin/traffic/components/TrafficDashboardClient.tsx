@@ -199,9 +199,25 @@ export default function TrafficDashboardClient({ kpis, chartData, sourceStats, l
 
         {activeTab === "ads" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <AdsCard title="Meta Ads" icon={MetaIcon} color="bg-blue-600" />
-            <AdsCard title="Google Ads" icon={GoogleIcon} color="bg-white" textColor="text-black" />
-            <AdsCard title="TikTok Ads" icon={TikTokIcon} color="bg-red-600" />
+            <AdsCard 
+              title="Meta Ads" 
+              icon={MetaIcon} 
+              color="bg-blue-600" 
+              onClick={() => toast.info("Detalhes avançados em desenvolvimento. Para visualizar os leads, acesse a aba 'Gestão de Leads'.")} 
+            />
+            <AdsCard 
+              title="Google Ads" 
+              icon={GoogleIcon} 
+              color="bg-white" 
+              textColor="text-black" 
+              onClick={() => toast.info("Detalhes avançados em desenvolvimento. Para visualizar os leads, acesse a aba 'Gestão de Leads'.")} 
+            />
+            <AdsCard 
+              title="TikTok Ads" 
+              icon={TikTokIcon} 
+              color="bg-red-600" 
+              onClick={() => toast.info("Detalhes avançados em desenvolvimento. Para visualizar os leads, acesse a aba 'Gestão de Leads'.")} 
+            />
           </div>
         )}
       </main>
@@ -209,7 +225,7 @@ export default function TrafficDashboardClient({ kpis, chartData, sourceStats, l
   );
 }
 
-function AdsCard({ title, icon: Icon, color, textColor = "text-white" }: any) {
+function AdsCard({ title, icon: Icon, color, textColor = "text-white", onClick }: any) {
   return (
     <div className="bg-zinc-900/40 border border-white/5 p-8 rounded-[32px] flex flex-col items-center text-center">
       <div className={`w-16 h-16 ${color} ${textColor} rounded-2xl flex items-center justify-center mb-6`}>
@@ -217,7 +233,10 @@ function AdsCard({ title, icon: Icon, color, textColor = "text-white" }: any) {
       </div>
       <h3 className="text-xl font-black italic uppercase mb-2">{title}</h3>
       <p className="text-zinc-500 text-sm mb-6">Conexão via API ativa</p>
-      <button className="w-full bg-zinc-800 text-white py-4 rounded-2xl text-xs font-black uppercase hover:bg-zinc-700 transition-all">
+      <button 
+        onClick={onClick}
+        className="w-full bg-zinc-800 text-white py-4 rounded-2xl text-xs font-black uppercase hover:bg-zinc-700 transition-all"
+      >
         Ver Detalhes
       </button>
     </div>

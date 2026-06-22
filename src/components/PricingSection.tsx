@@ -1,59 +1,20 @@
 "use client";
 
-import { Check, Target, Play } from "lucide-react";
-import { PLANS } from "@/lib/stripe";
+import { Check, Zap, Play } from "lucide-react";
 import { motion } from "framer-motion";
-import { createCheckoutSession, createOneOffCheckoutSession } from "@/app/actions/stripe";
+import { createCheckoutSession } from "@/app/actions/stripe";
 import { useState } from "react";
 
-const GOALS = [
-  "Hipertrofia",
-  "Emagrecimento",
-  "Recomposição Corporal",
-  "Corrida de Rua",
-  "Tenho diabetes ou colesterol alto e hipertrofia",
-  "Tenho diabetes e colesterol alto e emagrecimento",
-  "Sou hipertenso e Hipertrofia",
-  "Sou hipertenso e Emagrecimento",
-];
-
 export function PricingSection() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [selectedGoal, setSelectedGoal] = useState(GOALS[0]);
+  const [loading, setLoading] = useState(false);
 
-  const filteredPlans = PLANS.filter(plan => {
-    // Se o objetivo selecionado for Corrida, priorizamos os planos de corrida e o avulso
-    if (selectedGoal === "Corrida de Rua") {
-      return plan.goalGroup === "Corrida" || plan.id === "avulso";
-    }
-    
-    // Para outros objetivos, mostramos todos os planos de musculação/funcional
-    // E também incluímos os combos de corrida, pois eles abrangem musculação
-    return true;
-  });
-
-  const handleSubscribe = async (plan: typeof PLANS[0]) => {
-    if (loadingPlan) return;
-    
-    if (!plan.stripePriceId) {
-      alert("Configuração de preço pendente no Stripe.");
-      return;
-    }
-
-    setLoadingPlan(plan.id);
-    console.log(`[PRICING] Iniciando checkout para plano: ${plan.id} | Tipo: ${plan.type}`);
+  const handleSubscribe = async () => {
+    if (loading) return;
+    setLoading(true);
+    console.log(`[PRICING] Iniciando checkout para o Plano Único VIP Trial`);
     
     try {
-      const isOneOff = plan.type === "one_time";
-      let result;
-
-      if (isOneOff) {
-        console.log(`[PRICING] Chamando createOneOffCheckoutSession...`);
-        result = await createOneOffCheckoutSession(selectedGoal, plan.stripePriceId);
-      } else {
-        console.log(`[PRICING] Chamando createCheckoutSession...`);
-        result = await createCheckoutSession(plan.stripePriceId, selectedGoal);
-      }
+      const result = await createCheckoutSession();
       
       console.log(`[PRICING] Resultado do checkout:`, result);
       
@@ -71,130 +32,106 @@ export function PricingSection() {
       console.error("Erro no checkout:", e);
       alert(`Ocorreu um erro ao tentar processar o pagamento: ${e.message || "Erro desconhecido"}`);
     } finally {
-      setLoadingPlan(null);
+      setLoading(false);
     }
   };
 
   return (
-    <section id="pricing" className="py-24 bg-black/50 overflow-hidden">
+    <section id="pricing" className="py-24 bg-black/50 overflow-hidden relative">
+      {/* Background elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
+
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black mb-4 uppercase italic">
-            Escolha seu <span className="text-primary">Programa</span>
+          <h2 className="text-4xl md:text-6xl font-black mb-4 uppercase italic">
+            ACESSO <span className="text-primary">TOTAL</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-12">
-            Selecione seu objetivo principal e nossa IA direcionará the melhor treinamento para você.
+          <p className="text-white/60 text-lg max-w-2xl mx-auto">
+            Esqueça planos engessados. Assine uma única vez e destrave todas as modalidades: Musculação, Corrida e Funcional.
           </p>
+        </div>
 
-          {/* Seletor de Objetivo */}
-          <div className="max-w-4xl mx-auto mb-20">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {GOALS.map((goal) => (
-                <button
-                  key={goal}
-                  onClick={() => setSelectedGoal(goal)}
-                  className={`p-4 rounded-2xl border transition-all text-sm font-bold flex items-center gap-3 ${
-                    selectedGoal === goal
-                      ? "bg-primary border-primary text-black scale-105 shadow-xl shadow-primary/20"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                  }`}
-                >
-                  <Target className={`h-5 w-5 ${selectedGoal === goal ? "text-black" : "text-primary"}`} />
-                  {goal}
-                </button>
-              ))}
+        <div className="max-w-xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="glass p-10 md:p-14 rounded-[40px] flex flex-col relative transition-all duration-300 border-primary/50 ring-2 ring-primary/20 shadow-[0_0_50px_rgba(var(--primary-rgb),0.15)] bg-zinc-900/80 backdrop-blur-xl"
+          >
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-black text-sm font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-lg shadow-primary/30 flex items-center gap-2">
+              <Zap className="w-4 h-4 fill-black" /> Oferta Especial
             </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {filteredPlans.map((plan, index) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ 
-                y: -10,
-                scale: plan.id === "combo-performance" || plan.id === "completo" ? 1.08 : 1.03,
-                transition: { duration: 0.2 }
-              }}
-              transition={{ delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className={`glass p-8 rounded-3xl flex flex-col relative transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)] hover:border-primary/40 ${
-                plan.id === "combo-performance" || plan.id === "completo" ? "border-primary/50 ring-2 ring-primary/20 scale-105 z-10" : "border-white/10"
-              }`}
-            >
-              {(plan.id === "combo-performance" || plan.id === "completo") && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-black text-xs font-bold px-4 py-1 rounded-full uppercase">
-                  O Melhor
+            
+            <div className="text-center mb-8 mt-4">
+              <h3 className="text-3xl font-black italic uppercase mb-2">Teste o FitConnect VIP</h3>
+              <p className="text-zinc-400 mb-6">Comece sua transformação hoje mesmo.</p>
+              
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-zinc-500 uppercase text-xs font-bold tracking-widest mb-2">1º Mês de Teste</span>
+                <div className="flex items-start gap-1 text-primary">
+                  <span className="text-2xl font-bold mt-2">R$</span>
+                  <span className="text-7xl font-black tracking-tighter leading-none">2,99</span>
                 </div>
-              )}
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <p className="text-sm text-white/60 mb-4">{plan.description}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black">R$ {plan.price}</span>
-                  <span className="text-white/60 text-sm">/ {plan.type === 'one_time' ? 'compra única' : 'mês'}</span>
-                </div>
+                <p className="text-sm text-zinc-500 mt-4 max-w-[280px]">
+                  Após os 30 dias de teste, o valor é de apenas <strong className="text-white">R$ 19,00/mês</strong>. Cancele a qualquer momento.
+                </p>
               </div>
+            </div>
 
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-3 text-sm">
-                  <Check className="h-5 w-5 text-primary" />
-                  Especializado em <span className="text-primary font-bold">{selectedGoal}</span>
-                </li>
-                <li className="flex items-center gap-3 text-sm">
-                  <Check className="h-5 w-5 text-primary" />
-                  Vídeos Demonstrativos
-                </li>
-                {plan.id !== "avulso" && (
-                  <li className="flex items-center gap-3 text-sm">
-                    <Check className="h-5 w-5 text-primary" />
-                    Suporte via WhatsApp
-                  </li>
-                )}
-                {plan.type === "one_time" && (
-                  <li className="flex items-center gap-3 text-sm">
-                    <Check className="h-5 w-5 text-zinc-500" />
-                    Expira em 3 dias
-                  </li>
-                )}
-              </ul>
+            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-8" />
 
-              <button 
-                onClick={() => handleSubscribe(plan)}
-                disabled={loadingPlan !== null}
-                className={`btn-premium w-full flex items-center justify-center gap-2 ${
-                  plan.id === "completo" ? "btn-primary" : "btn-outline"
-                } ${loadingPlan === plan.id ? "opacity-75 cursor-wait" : ""}`}
-              >
-                {loadingPlan === plan.id ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  `Assinar Plano ${plan.name.split(' ')[0]}`
-                )}
-              </button>
-            </motion.div>
-          ))}
+            <ul className="space-y-5 mb-10">
+              {[
+                "Acesso completo a TODAS as modalidades",
+                "Treinos em casa (Funcional sem peso)",
+                "Planilhas completas de Corrida",
+                "Fichas de Musculação avançadas",
+                "Vídeos passo a passo de execução",
+                "Suporte Premium"
+              ].map((feature, i) => (
+                <li key={i} className="flex items-center gap-4 text-base font-medium">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <button 
+              onClick={handleSubscribe}
+              disabled={loading}
+              className={`w-full py-6 rounded-2xl bg-primary text-black font-black uppercase text-xl tracking-wide transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-primary/20 flex items-center justify-center gap-3 ${loading ? "opacity-75 cursor-wait" : "hover:bg-primary/90"}`}
+            >
+              {loading ? (
+                <>
+                  <div className="h-6 w-6 border-4 border-black/30 border-t-black rounded-full animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                "Desbloquear Meu Acesso Agora"
+              )}
+            </button>
+            <div className="text-center mt-4">
+              <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold">Pagamento 100% Seguro via Stripe</span>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Botão de Aula Gratuita */}
-        <div className="mt-20 text-center">
+        {/* Botão de Aula Gratuita Alternativo */}
+        <div className="mt-24 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="inline-block p-1 rounded-2xl bg-gradient-to-r from-primary to-orange-500 shadow-xl shadow-primary/20"
+            className="inline-block"
           >
             <button 
               onClick={() => alert("A aula gratuita em breve estará disponível!")}
-              className="bg-zinc-950 hover:bg-zinc-900 border border-transparent text-white px-8 py-5 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-colors uppercase w-full sm:w-auto"
+              className="text-zinc-400 hover:text-white px-8 py-5 font-bold text-sm flex items-center justify-center gap-2 transition-colors uppercase mx-auto"
             >
-              <Play className="h-6 w-6 text-primary" />
-              Quero minha aula de funcional em casa gratuita
+              <Play className="h-5 w-5" />
+              Ver uma aula gratuita de demonstração
             </button>
           </motion.div>
         </div>

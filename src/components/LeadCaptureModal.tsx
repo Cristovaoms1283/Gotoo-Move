@@ -1,19 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Mail, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
 import { registerLead } from "@/app/actions/leads";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 interface LeadCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function LeadCaptureModal({ isOpen, onClose }: LeadCaptureModalProps) {
+function LeadCaptureModalContent({ isOpen, onClose }: LeadCaptureModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Pega os UTMs da URL (ex: ?utm_source=meta&utm_campaign=blackfriday)
+  const source = searchParams?.get("utm_source") || searchParams?.get("source") || "";
+  const campaign = searchParams?.get("utm_campaign") || searchParams?.get("campaign") || "";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,6 +84,10 @@ export function LeadCaptureModal({ isOpen, onClose }: LeadCaptureModalProps) {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Campos ocultos de Rastreamento (UTMs) */}
+                    <input type="hidden" name="source" value={source} />
+                    <input type="hidden" name="campaign" value={campaign} />
+
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-widest text-white/40 ml-1">Nome Completo</label>
                       <div className="relative">
@@ -160,5 +170,13 @@ export function LeadCaptureModal({ isOpen, onClose }: LeadCaptureModalProps) {
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+export function LeadCaptureModal(props: LeadCaptureModalProps) {
+  return (
+    <Suspense fallback={null}>
+      <LeadCaptureModalContent {...props} />
+    </Suspense>
   );
 }
