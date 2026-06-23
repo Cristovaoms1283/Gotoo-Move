@@ -8,6 +8,7 @@ import { rotateUserProgram } from "@/app/actions/programs";
 import { redirect } from "next/navigation";
 import { InstallPWA } from "@/components/InstallPWA";
 import { DashboardCard } from "@/components/DashboardCard";
+import { UpgradeBanner } from "@/components/UpgradeBanner";
 
 const HUB_OPTIONS = [
   {
@@ -162,6 +163,11 @@ export default async function DashboardHubPage() {
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {(!access?.canGym && !access?.canHIIT && !access?.canRunning) && (
+              <div className="md:col-span-2">
+                <UpgradeBanner />
+              </div>
+            )}
             {dynamicOptions.map((option) => (
               <DashboardCard
                 key={option.title}
