@@ -183,6 +183,9 @@ export default async function DashboardHubPage() {
       </main>
     );
   } catch (error: any) {
+    if (error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
     console.error("DASHBOARD_CRITICAL_ERROR:", error);
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-6 text-center">
