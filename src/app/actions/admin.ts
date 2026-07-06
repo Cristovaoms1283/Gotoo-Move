@@ -2,12 +2,12 @@
 
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { checkAdmin } from "@/lib/admin";
+import { requireAdmin, requireAdminOrSupervisor } from "@/lib/admin";
 import { redirect } from "next/navigation";
 
 // --- Dicas de Treino (Tips) ---
 export async function createTip(formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string || "musculacao";
@@ -22,14 +22,14 @@ export async function createTip(formData: FormData) {
 }
 
 export async function deleteTip(id: string) {
-  await checkAdmin();
+  await requireAdmin();
   await prisma.tip.delete({ where: { id } });
   revalidatePath("/admin/tips");
 }
 
 // --- Nutrição (Nutrition) ---
 export async function createNutrition(formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
   const category = formData.get("category") as string || "horarios";
@@ -44,14 +44,14 @@ export async function createNutrition(formData: FormData) {
 }
 
 export async function deleteNutrition(id: string) {
-  await checkAdmin();
+  await requireAdmin();
   await prisma.nutrition.delete({ where: { id } });
   revalidatePath("/admin/nutrition");
 }
 
 // --- Receitas (Recipes) ---
 export async function createRecipe(formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const title = formData.get("title") as string;
   const ingredients = formData.get("ingredients") as string;
   const instructions = formData.get("instructions") as string;
@@ -76,7 +76,7 @@ export async function createRecipe(formData: FormData) {
 }
 
 export async function deleteRecipe(id: string) {
-  await checkAdmin();
+  await requireAdmin();
   await prisma.recipe.delete({ where: { id } });
   revalidatePath("/admin/recipes");
 }

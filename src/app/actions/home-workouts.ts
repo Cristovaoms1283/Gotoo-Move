@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin, requireAdminOrSupervisor } from "@/lib/admin";
 
 export type HomeWorkoutData = {
   title: string;
@@ -36,6 +37,7 @@ export async function getHomeWorkoutById(id: string) {
 
 // Criar um novo treino em casa
 export async function createHomeWorkout(data: HomeWorkoutData) {
+  await requireAdminOrSupervisor();
   try {
     const lastWorkout = await prisma.homeWorkout.findFirst({
       orderBy: { order: "desc" }
@@ -61,6 +63,7 @@ export async function createHomeWorkout(data: HomeWorkoutData) {
 
 // Atualizar um treino em casa
 export async function updateHomeWorkout(id: string, data: Partial<HomeWorkoutData>) {
+  await requireAdminOrSupervisor();
   try {
     await prisma.homeWorkout.update({
       where: { id },
@@ -78,6 +81,7 @@ export async function updateHomeWorkout(id: string, data: Partial<HomeWorkoutDat
 
 // Excluir um treino em casa
 export async function deleteHomeWorkout(id: string) {
+  await requireAdmin();
   try {
     await prisma.homeWorkout.delete({
       where: { id }

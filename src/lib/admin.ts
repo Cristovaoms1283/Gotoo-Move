@@ -2,29 +2,56 @@ import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
 
-export async function checkAdmin() {
+export async function getUserRole() {
   const { userId } = await auth();
-  console.log(`[CHECK_ADMIN] Verificando acesso para UserID: ${userId || 'Nulo'}`);
+  if (!userId) return null;
+  
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { role: true },
+  });
+  
+  return user?.role || "user";
+}
 
+export async function requireAdminOrSupervisor() {
+  const { userId } = await auth();
+  
   if (!userId) {
-    console.log("[CHECK_ADMIN] Redirecionando para /sign-in por falta de UserID");
     redirect("/sign-in");
   }
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    select: { role: true },
+    select: { role: true, id: true },
   });
 
-  console.log(`[CHECK_ADMIN] Resultado da query DB para ${userId}:`, user);
-
-  if (user?.role !== "admin") {
-    console.log(`[CHECK_ADMIN] ACESSO NEGADO. Role: ${user?.role || 'null'}. Redirecionando para /`);
+  const role = user?.role;
+  
+  if (role !== "admin" && role !== "supervisor") {
+    console.log(`[CHECK_AUTH] Acesso bloqueado. Role: ${role}`);
     redirect("/");
   }
 
-  console.log(`[CHECK_ADMIN] ACESSO PERMITIDO (admin).`);
-  return user;
+  return { clerkId: userId, dbId: user?.id, role };
+}
 
-  return user;
+export async function requireAdmin() {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { role: true, id: true },
+  });
+
+  if (user?.role !== "admin") {
+    console.log(`[CHECK_AUTH] Acesso bloqueado. Exigido: Admin. Recebido: ${user?.role}`);
+    redirect("/"); 
+  }
+
+  return { clerkId: userId, dbId: user?.id, role: user.role };
 }

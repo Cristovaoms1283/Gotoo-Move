@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin, requireAdminOrSupervisor } from "@/lib/admin";
 
 export async function getRewards() {
   return await prisma.reward.findMany({
@@ -10,6 +11,7 @@ export async function getRewards() {
 }
 
 export async function createReward(data: { name: string, description: string, cost: number, imageUrl?: string }) {
+  await requireAdminOrSupervisor();
   try {
     const reward = await prisma.reward.create({
       data: {
@@ -29,6 +31,7 @@ export async function createReward(data: { name: string, description: string, co
 }
 
 export async function deleteReward(id: string) {
+  await requireAdmin();
   try {
     await prisma.reward.delete({ where: { id } });
     revalidatePath("/admin/rewards");

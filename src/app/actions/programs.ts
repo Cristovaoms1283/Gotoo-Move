@@ -2,11 +2,11 @@
 
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { checkAdmin } from "@/lib/admin";
+import { requireAdmin, requireAdminOrSupervisor } from "@/lib/admin";
 import { redirect } from "next/navigation";
 
 export async function createProgram(formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const durationDays = parseInt(formData.get("durationDays") as string) || 30;
@@ -26,7 +26,7 @@ export async function createProgram(formData: FormData) {
 }
 
 export async function updateProgram(id: string, formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const durationDays = parseInt(formData.get("durationDays") as string) || 30;
@@ -47,7 +47,7 @@ export async function updateProgram(id: string, formData: FormData) {
 }
 
 export async function deleteProgram(id: string) {
-  await checkAdmin();
+  await requireAdmin();
   await prisma.trainingProgram.delete({
     where: { id },
   });
@@ -55,7 +55,7 @@ export async function deleteProgram(id: string) {
 }
 
 export async function addWorkoutToProgram(programId: string, formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const workoutId = formData.get("workoutId") as string;
   const label = formData.get("label") as string; // ex: "Ficha A"
   const order = parseInt(formData.get("order") as string) || 0;
@@ -73,7 +73,7 @@ export async function addWorkoutToProgram(programId: string, formData: FormData)
 }
 
 export async function removeWorkoutFromProgram(programWorkoutId: string, programId: string) {
-  await checkAdmin();
+  await requireAdmin();
   const programWorkout = await prisma.programWorkout.findUnique({
     where: { id: programWorkoutId },
     include: { workout: true }
@@ -94,7 +94,7 @@ export async function removeWorkoutFromProgram(programWorkoutId: string, program
 }
 
 export async function createFichaForProgram(programId: string, formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   const label = formData.get("label") as string; // ex: "Ficha A"
   const order = parseInt(formData.get("order") as string) || 0;
   
@@ -123,7 +123,7 @@ export async function createFichaForProgram(programId: string, formData: FormDat
 }
 
 export async function assignProgramToUser(userId: string, programId: string | null) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -135,7 +135,7 @@ export async function assignProgramToUser(userId: string, programId: string | nu
 }
 
 export async function duplicateProgram(id: string) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   
   const program = await prisma.trainingProgram.findUnique({
     where: { id },

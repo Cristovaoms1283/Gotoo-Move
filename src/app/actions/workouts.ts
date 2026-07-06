@@ -2,11 +2,11 @@
 
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { checkAdmin } from "@/lib/admin";
+import { requireAdmin, requireAdminOrSupervisor } from "@/lib/admin";
 import { redirect } from "next/navigation";
 
 export async function createWorkout(formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -39,7 +39,7 @@ export async function createWorkout(formData: FormData) {
 }
 
 export async function updateWorkout(id: string, formData: FormData) {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -60,7 +60,7 @@ export async function updateWorkout(id: string, formData: FormData) {
 
 export async function addExercise(workoutId: string, formData: FormData) {
   try {
-    await checkAdmin();
+    await requireAdminOrSupervisor();
 
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
@@ -122,7 +122,7 @@ export async function addExercise(workoutId: string, formData: FormData) {
 
 export async function updateExercise(id: string, workoutId: string, data: any) {
   try {
-    await checkAdmin();
+    await requireAdminOrSupervisor();
 
     console.log(`[UPDATE_EXERCISE] Atualizando exercício ${id}:`, data);
 
@@ -163,7 +163,7 @@ export async function updateExercise(id: string, workoutId: string, data: any) {
 }
 
 export async function deleteExercise(id: string, workoutId: string) {
-  await checkAdmin();
+  await requireAdmin();
 
   await prisma.exercise.delete({
     where: { id },
@@ -174,7 +174,7 @@ export async function deleteExercise(id: string, workoutId: string) {
 }
 
 export async function deleteWorkout(id: string) {
-  await checkAdmin();
+  await requireAdmin();
 
   await prisma.workout.delete({
     where: { id },
@@ -185,7 +185,7 @@ export async function deleteWorkout(id: string) {
 }
 
 export async function syncExerciseVideos() {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   
   const exercisesWithVideo = await prisma.exercise.findMany({
     where: {
@@ -232,7 +232,7 @@ export async function syncExerciseVideos() {
 }
 
 export async function getExercisesWithoutVideo() {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
   
   // 1. Buscar todos os nomes únicos de exercícios no sistema
   const allExercises = await prisma.exercise.findMany({
@@ -256,7 +256,7 @@ export async function getExercisesWithoutVideo() {
 }
 
 export async function updateVideoForExerciseName(name: string, youtubeId: string, videoProvider: string = "youtube") {
-  await checkAdmin();
+  await requireAdminOrSupervisor();
 
   const result = await prisma.exercise.updateMany({
     where: { name },

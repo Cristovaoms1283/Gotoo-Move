@@ -1,10 +1,13 @@
 // Central de Tráfego - Server Component Real
+import { requireAdmin } from "@/lib/admin";
 import prisma from "@/lib/db";
 import TrafficDashboardClient from "./components/TrafficDashboardClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function TrafficCenterPage() {
+  await requireAdmin();
+
   // 1. Buscar Leads Reais do Banco de Dados
   const leads = await prisma.lead.findMany({
     orderBy: { createdAt: 'desc' }

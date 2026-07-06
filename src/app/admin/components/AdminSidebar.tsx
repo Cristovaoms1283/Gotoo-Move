@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-export function AdminSidebar() {
+export function AdminSidebar({ role = "admin" }: { role?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -14,7 +14,7 @@ export function AdminSidebar() {
     { href: "/admin/users", label: "Gerenciar Alunos" },
     { href: "/admin/guests", label: "Gestão de Convidados", className: "text-blue-400 font-bold" },
     { href: "/admin/leads", label: "Gestão de Leads (Novo)", className: "text-green-400 font-bold" },
-    { href: "/admin/traffic", label: "Central de Tráfego", className: "text-cyan-400 font-bold" },
+    { href: "/admin/traffic", label: "Central de Tráfego", className: "text-cyan-400 font-bold", requiresAdmin: true },
     { href: "/admin/workouts", label: "Fichas de Treino" },
     { href: "/admin/programs", label: "Programas (30 dias)", className: "text-orange-400 font-bold" },
     { href: "/admin/home-workouts", label: "Treinos em Casa", className: "text-blue-400 font-bold" },
@@ -23,6 +23,11 @@ export function AdminSidebar() {
     { href: "/admin/recipes", label: "Receitas Fitness" },
     { href: "/", label: "Voltar ao Site", className: "text-zinc-500 hover:text-white" },
   ];
+
+  const visibleLinks = links.filter((link) => {
+    if (link.requiresAdmin && role !== "admin") return false;
+    return true;
+  });
 
   return (
     <>
@@ -53,7 +58,7 @@ export function AdminSidebar() {
           <h2 className="text-xl font-bold text-orange-500 leading-tight">Gotoo Move<br/><span className="text-sm text-zinc-400 font-normal">Admin</span></h2>
         </div>
         <nav className="space-y-1.5 pb-20 md:pb-0">
-          {links.map((link) => {
+          {visibleLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link 
