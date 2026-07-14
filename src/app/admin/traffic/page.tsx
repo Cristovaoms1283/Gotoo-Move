@@ -1,12 +1,20 @@
 // Central de Tráfego - Server Component Real
-import { requireAdmin } from "@/lib/admin";
+import { getUserRole } from "@/lib/admin";
 import prisma from "@/lib/db";
 import TrafficDashboardClient from "./components/TrafficDashboardClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function TrafficCenterPage() {
-  await requireAdmin();
+  const role = await getUserRole();
+  if (role !== "admin") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <h1 className="text-2xl font-bold text-red-500 mb-2 uppercase italic">Acesso Restrito</h1>
+        <p className="text-zinc-400">Somente administradores principais têm acesso à Central de Tráfego e Financeiro.</p>
+      </div>
+    );
+  }
 
   // 1. Buscar Leads Reais do Banco de Dados
   const leads = await prisma.lead.findMany({

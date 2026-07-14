@@ -207,7 +207,7 @@ export default function WorkoutClientView({
                 <video
                   key={`${activeExerciseIndex}-${activeExercise.youtubeId}`}
                   src={activeExercise.youtubeId}
-                  className="w-full h-full object-contain bg-black/50"
+                  className="w-full h-full object-cover"
                   autoPlay loop muted playsInline
                 />
               ) : (
@@ -215,7 +215,7 @@ export default function WorkoutClientView({
                   key={`${activeExerciseIndex}-${activeExercise.youtubeId}`}
                   src={activeExercise.youtubeId || "https://placehold.co/600x400/000/fff?text=Sem+Vídeo"}
                   alt={activeExercise.name}
-                  className="w-full h-full object-contain bg-black/50"
+                  className="w-full h-full object-cover"
                 />
               )}
               

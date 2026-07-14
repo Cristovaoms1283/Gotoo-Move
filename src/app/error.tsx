@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 
 export default function GlobalError({
   error,
@@ -9,6 +10,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  if (isRedirectError(error)) {
+    throw error;
+  }
+
   useEffect(() => {
     console.error('GLOBAL_ERROR_CAPTURED:', error);
   }, [error]);
