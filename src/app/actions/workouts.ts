@@ -214,7 +214,11 @@ export async function syncExerciseVideos() {
     const result = await prisma.exercise.updateMany({
       where: {
         name: name,
-        youtubeId: ""
+        OR: [
+          { youtubeId: { not: video.youtubeId } },
+          { videoProvider: { not: video.videoProvider } },
+          { youtubeId: "" }
+        ]
       },
       data: {
         youtubeId: video.youtubeId,

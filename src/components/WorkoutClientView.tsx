@@ -14,6 +14,18 @@ interface ActiveTimer {
   totalTime: number;
   exerciseName: string;
 }
+
+function getThumbnailUrl(youtubeId?: string | null) {
+  if (!youtubeId) return "https://placehold.co/600x400/000/fff?text=Sem+Video";
+  const ytMatch = youtubeId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+  if (ytMatch && ytMatch[1]) {
+    return `https://img.youtube.com/vi/${ytMatch[1]}/0.jpg`;
+  }
+  if (youtubeId.match(/\.(mp4|webm|mov|ogg)$/i)) {
+    return "https://placehold.co/600x400/18181b/f97316?text=Video+Anexado";
+  }
+  return youtubeId;
+}
 export default function WorkoutClientView({ 
   workout, 
   selectedLabel, 
@@ -195,6 +207,109 @@ export default function WorkoutClientView({
     const secs = s % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  if (!workoutStarted) {
+    return (
+      <div className="w-full animate-fade-in pb-12">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">Visualização da Ficha</h2>
+            <p className="text-white/60 text-sm mt-1">{workout.description || "Clique em um exercício ou em Iniciar para entrar no Modo Foco (com cronômetro)."}</p>
+          </div>
+          <button 
+            onClick={() => setWorkoutStarted(true)}
+            className="btn-premium btn-primary w-full sm:w-auto px-8 py-4 text-base shadow-[0_0_40px_rgba(var(--primary-rgb),0.3)] animate-pulse flex items-center justify-center gap-2"
+          >
+            INICIAR TREINO <PlayCircle className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="bg-zinc-900/50 rounded-[32px] border border-white/5 overflow-hidden shadow-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr className="border-b border-white/5 bg-zinc-900">
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest w-16">Ord.</th>
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest">Exercício</th>
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">Séries</th>
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">Reps</th>
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">Descanso</th>
+                  <th className="px-6 py-5 text-xs font-bold text-zinc-500 uppercase tracking-widest text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {workout.exercises.map((ex: any, idx: number) => {
+                  const isDone = (setsCompleted[ex.id] || 0) >= (ex.isGironda ? 8 : parseInt(ex.sets || "3"));
+                  return (
+                  <tr 
+                    key={ex.id} 
+                    className={`group transition-all duration-300 cursor-pointer ${isDone ? 'bg-green-500/5 opacity-50 hover:opacity-100 hover:bg-green-500/10' : 'hover:bg-white/[0.02]'}`}
+                    onClick={() => {
+                      setActiveExerciseIndex(idx);
+                      setWorkoutStarted(true);
+                    }}
+                  >
+                    <td className="px-6 py-4">
+                      <span className={`text-xl font-black italic transition-colors ${isDone ? 'text-green-500' : 'text-zinc-600 group-hover:text-primary'}`}>{isDone ? '✓' : idx + 1}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-24 h-16 shrink-0 bg-black rounded-lg overflow-hidden border border-white/10 relative group-hover:border-primary/50 transition-colors shadow-lg">
+                          <img src={getThumbnailUrl(ex.youtubeId)} alt={ex.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <PlayCircle className="text-white h-8 w-8 drop-shadow-md" />
+                          </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className={`font-black tracking-tight uppercase italic transition-colors text-lg ${isDone ? 'text-white/50 line-through' : 'text-white group-hover:text-primary'}`}>{ex.name}</span>
+                          {ex.isGironda && <span className="text-[10px] text-orange-500 font-bold uppercase mt-0.5">⚡ Método 8x8 Gironda</span>}
+                          {ex.description && <span className="text-xs text-zinc-500 mt-1 line-clamp-1 max-w-[250px]">{ex.description}</span>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-sm font-bold text-zinc-300 font-mono">
+                        {ex.isGironda ? <span className="text-orange-500">8</span> : (ex.sets || '-')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-sm font-bold text-zinc-300 font-mono">
+                        {ex.isGironda ? <span className="text-orange-500">8</span> : (ex.reps || '-')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-sm font-bold text-zinc-300 font-mono">
+                        {ex.isGironda ? <span className="text-orange-500">30s</span> : (ex.rest || '-')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-zinc-900 text-zinc-500 group-hover:bg-primary group-hover:text-black transition-colors shadow-md border border-white/5 group-hover:border-primary">
+                        <PlayCircle className="h-5 w-5" />
+                      </div>
+                    </td>
+                  </tr>
+                )})}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <WorkoutFeedbackModal 
+          isOpen={isFeedbackModalOpen}
+          onClose={() => setIsFeedbackModalOpen(false)}
+          onSubmit={handleFinishWorkout}
+          isSubmitting={isSubmitting}
+        />
+        <LoadHistoryModal 
+          isOpen={isHistoryModalOpen}
+          onClose={() => setIsHistoryModalOpen(false)}
+          exerciseId={activeExercise?.id}
+          exerciseName={activeExercise?.name}
+          userId={userId}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

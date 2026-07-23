@@ -57,17 +57,7 @@ export default function ExerciseList({
 
   return (
     <div className="space-y-4">
-      {/* Botão de Iniciar Treino */}
-      {!workoutStarted && (
-        <div className="mb-4">
-          <button 
-            onClick={() => setWorkoutStarted(true)}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-black font-black italic tracking-widest uppercase py-4 rounded-2xl shadow-[0_0_30px_rgba(249,115,22,0.3)] transition-all animate-pulse"
-          >
-            Iniciar Ficha Agora
-          </button>
-        </div>
-      )}
+      {/* O botão Iniciar Ficha foi removido do sidebar porque a view Preview (Tabela) lida com isso agora */}
 
       <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {exercises.map((exercise, idx) => {
