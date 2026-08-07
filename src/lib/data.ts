@@ -100,6 +100,13 @@ export async function getUserSubscriptionStatus(clerkId: string) {
         });
         if (oneOff) planName = "Plano Avulso";
       }
+
+      // FALLBACK CRÍTICO: usuário com status 'active' mas sem subscription/oneOff registrado
+      // (ocorre quando o webhook cria o status mas falha ao criar a Subscription)
+      // Neste caso, liberamos acesso completo para não punir quem já pagou.
+      if (planName === 'Nenhum' && user?.status === 'active') {
+        planName = 'Combo Performance';
+      }
     }
 
     // 3. Mapeamento de Regras (Conforme solicitado)

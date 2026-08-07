@@ -128,21 +128,48 @@ export async function POST(req: Request) {
         },
       });
 
-      // Registra ou atualiza a assinatura
-      await prisma.subscription.upsert({
-        where: { stripeSubscriptionId: subId || "test_sub" },
-        create: {
-          userId: user.id,
-          planId: planId,
-          status: "active",
-          stripeSubscriptionId: subId || "test_sub",
-          currentPeriodEnd: currentPeriodEnd,
-        },
-        update: {
-          status: "active",
-          currentPeriodEnd: currentPeriodEnd,
-        },
-      });
+      // Registra ou atualiza a assinatura (tolerante a planId inexistente)
+      if (planId && planId !== "default") {
+        await prisma.subscription.upsert({
+          where: { stripeSubscriptionId: subId || "test_sub" },
+          create: {
+            userId: user.id,
+            planId: planId,
+            status: "active",
+            stripeSubscriptionId: subId || "test_sub",
+            currentPeriodEnd: currentPeriodEnd,
+          },
+          update: {
+            status: "active",
+            currentPeriodEnd: currentPeriodEnd,
+          },
+        });
+      } else {
+        // preço dinâmico sem planId fixo: apenas garante status active
+        // o acesso é controlado pelo fallback em data.ts (user.status === 'active')
+        console.log(`[STRIPE_WEBHOOK] Preço dinâmico detectado, subscription não salva no banco mas acesso liberado via status.`);
+        // Tenta upsert sem planId se houver subId válido
+        if (subId) {
+          try {
+            await prisma.subscription.upsert({
+              where: { stripeSubscriptionId: subId },
+              create: {
+                userId: user.id,
+                planId: (await prisma.plan.findFirst())?.id || "",
+                status: "active",
+                stripeSubscriptionId: subId,
+                currentPeriodEnd: currentPeriodEnd,
+              },
+              update: {
+                status: "active",
+                currentPeriodEnd: currentPeriodEnd,
+              },
+            });
+          } catch (subErr) {
+            console.warn(`[STRIPE_WEBHOOK] Não foi possível salvar Subscription, mas status=active já foi salvo no User.`, subErr);
+          }
+        }
+      }
     } 
     
     // Caso seja Pagamento Avulso (PIX, Cartão, etc)

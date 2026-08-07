@@ -3,6 +3,7 @@
 import { Play, Zap } from "lucide-react";
 import { useState } from "react";
 import { createCheckoutSession } from "@/app/actions/stripe";
+import Link from "next/link";
 
 export function UpgradeBanner() {
   const [loading, setLoading] = useState(false);
@@ -38,13 +39,13 @@ export function UpgradeBanner() {
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto z-10 shrink-0">
-        <button 
-          onClick={() => alert("Sua aula demonstrativa gratuita estará disponível em breve!")}
+        <Link 
+          href="/treino-em-casa"
           className="bg-zinc-950 text-white font-bold text-sm uppercase px-6 py-4 rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 shadow-lg"
         >
           <Play className="w-4 h-4 text-primary" />
           Aula Grátis
-        </button>
+        </Link>
         <button 
           onClick={handleCheckout} 
           disabled={loading}
